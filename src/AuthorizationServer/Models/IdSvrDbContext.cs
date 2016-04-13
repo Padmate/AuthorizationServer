@@ -17,8 +17,6 @@ namespace AuthorizationServer.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlServer(@"Data Source=(localdb)\ProjectsV12;Initial Catalog=FlugDbE2E;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
-            //optionsBuilder.UseInMemoryDatabase();
             var connectionString = Startup.Configuration["Data:DefaultConnection:ConnectionString"];
             optionsBuilder.UseSqlServer(connectionString);
         }

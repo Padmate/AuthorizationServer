@@ -55,8 +55,8 @@ namespace AuthorizationServer.Configuration
                     //Specifies allowed URIs to return tokens or authorization codes to
                     RedirectUris = new List<string>
                     {
-                         "http://localhost:15142/signin-oidc" //Client URI
-                         //"http://mvcclient.chinacloudsites.cn//signin-odic"
+                         //"http://localhost:15142/Home/CallBack" //Client URI
+                         "http://mvcclient.chinacloudsites.cn/Home/CallBack"
                     },
 
                     AllowedScopes = new List<string>

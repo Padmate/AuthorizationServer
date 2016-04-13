@@ -28,7 +28,8 @@ namespace AuthorizationServer
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true); 
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -42,12 +43,14 @@ namespace AuthorizationServer
 
             #region IdentityServer4
             var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
-
+            
             var builder = services.AddIdentityServer(options =>
             {
                 options.SigningCertificate = cert;
 
             });
+            
+
             builder.AddInMemoryClients(Clients.Get());
             builder.AddInMemoryScopes(Scopes.Get());
             //builder.AddInMemoryUsers(Users.Get());
