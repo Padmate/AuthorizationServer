@@ -14,14 +14,14 @@ namespace AuthorizationServer.Repository
 {
     public class UserRepository : IUserRepository
     {
-        IdSvrDbContext _context;
+        UserDbContext _context;
 
         #region construct
         public UserRepository()
         {
 
         }
-        public UserRepository(IdSvrDbContext context)
+        public UserRepository(UserDbContext context)
         {
             _context = context;
         }

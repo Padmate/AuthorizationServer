@@ -9,14 +9,14 @@ namespace AuthorizationServer.Repository
 {
     public class RoleRepository : IRoleRepository
     {
-        IdSvrDbContext _context;
+        UserDbContext _context;
 
         #region construct
         public RoleRepository()
         {
 
         }
-        public RoleRepository(IdSvrDbContext context)
+        public RoleRepository(UserDbContext context)
         {
             _context = context;
         }

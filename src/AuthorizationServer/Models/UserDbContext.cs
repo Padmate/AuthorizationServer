@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AuthorizationServer.Models
 {
-    public class IdSvrDbContext: IdentityDbContext<ApplicationUser>
+    public class UserDbContext: IdentityDbContext<ApplicationUser>
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -17,7 +17,7 @@ namespace AuthorizationServer.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = Startup.Configuration["Data:DefaultConnection:ConnectionString"];
+            var connectionString = Startup.Configuration["Data:UserConnection:ConnectionString"];
             optionsBuilder.UseSqlServer(connectionString);
         }
     }

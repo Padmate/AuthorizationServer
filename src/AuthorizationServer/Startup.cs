@@ -61,7 +61,7 @@ namespace AuthorizationServer
             #endregion
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IdSvrDbContext, IdSvrDbContext>();
+            services.AddTransient<UserDbContext, UserDbContext>();
 
 
             // for the UI
