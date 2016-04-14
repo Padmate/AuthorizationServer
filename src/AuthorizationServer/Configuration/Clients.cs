@@ -75,6 +75,7 @@ namespace AuthorizationServer.Configuration
                 new Client
                 {
                     ClientId = "padmate_resourceowner",
+                    ClientName="Resource Owner",
                     ClientSecrets = new List<Secret>
                     {
                         new Secret("padmate_resourceowner_secret".Sha256())

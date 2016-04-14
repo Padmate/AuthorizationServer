@@ -16,6 +16,8 @@ using IdentityServer4.Core.Services;
 using AuthorizationServer.Repository;
 using AuthorizationServer.Models;
 using Serilog;
+using TwentyTwenty.IdentityServer4.EntityFramework7.Extensions;
+using Microsoft.Data.Entity;
 
 namespace AuthorizationServer
 {
@@ -39,7 +41,10 @@ namespace AuthorizationServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddEntityFramework()
-                .AddSqlServer();
+                .AddSqlServer()
+                .AddDbContext<ClientConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]))
+                 .AddDbContext<ScopeConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]));
+                
 
             #region IdentityServer4
             var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
@@ -47,14 +52,18 @@ namespace AuthorizationServer
             var builder = services.AddIdentityServer(options =>
             {
                 options.SigningCertificate = cert;
-
             });
-            
 
-            builder.AddInMemoryClients(Clients.Get());
-            builder.AddInMemoryScopes(Scopes.Get());
-            //builder.AddInMemoryUsers(Users.Get());
-            //builder.Services.AddTransient<IUserService, UserService>();
+
+            //builder.AddInMemoryClients(Clients.Get());
+            //builder.AddInMemoryScopes(Scopes.Get());
+            //Configure Client and Scope
+            builder.ConfigureEntityFramework()
+            .RegisterOperationalStores()
+            .RegisterClientStore<Guid, ClientConfigurationContext>()
+            .RegisterScopeStore<Guid, ScopeConfigurationContext>();
+
+            //Configure User
             builder.Services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
             builder.Services.AddTransient<IProfileService, ProfileService>();
             //builder.AddCustomGrantValidator<CustomGrantValidator>();
@@ -62,6 +71,8 @@ namespace AuthorizationServer
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<UserDbContext, UserDbContext>();
+            services.AddTransient<ClientConfigurationContext, ClientConfigurationContext>();
+            services.AddTransient<ScopeConfigurationContext, ScopeConfigurationContext>();
 
 
             // for the UI
@@ -87,10 +98,12 @@ namespace AuthorizationServer
 
             loggerFactory.AddSerilog(logWarning);
 
+
             app.UseDeveloperExceptionPage();
             app.UseIISPlatformHandler();
 
             app.UseIdentityServer();
+            
 
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();
