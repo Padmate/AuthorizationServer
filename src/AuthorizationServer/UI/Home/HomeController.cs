@@ -1,6 +1,7 @@
 ﻿using AuthorizationServer.Configuration;
 using AuthorizationServer.Models;
 using Microsoft.AspNet.Mvc;
+using Microsoft.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,33 +14,44 @@ namespace AuthorizationServer.UI.Home
     {
         private ScopeConfigurationContext _scopeContext;
         private ClientConfigurationContext _clientContext;
+        private OperationalContext _operationalContext;
 
-        public HomeController(ClientConfigurationContext clientContext, ScopeConfigurationContext scopeContext)
+        public HomeController(ClientConfigurationContext clientContext, 
+            ScopeConfigurationContext scopeContext, OperationalContext operationalContext)
         {
             _clientContext = clientContext;
             _scopeContext = scopeContext;
+            _operationalContext = operationalContext;
         }
         
 
         [Route("/")]
         public IActionResult Index()
         {
-            //AddScopes();
-            //var scopes = _scopeContext.Scopes.ToList();
-
-            //AddClients();
-            //var clients = _clientContext.Clients.ToList();
             return View();
         }
 
-        public IActionResult AddClientsAndScopes()
+        public IActionResult AddDatabase()
         {
-            //AddScopes();
-            //var scopes = _scopeContext.Scopes.ToList();
+            AddScopes();
+            var scopes = _scopeContext.Scopes.ToList();
 
             AddClients();
             var clients = _clientContext.Clients.ToList();
 
+            return Json("Success");
+        }
+
+        public IActionResult RemoveDatabase()
+        {
+            _clientContext.RemoveRange(_clientContext.Clients);
+            _scopeContext.RemoveRange(_scopeContext.Scopes);
+            _operationalContext.RemoveRange(_operationalContext.Tokens);
+            _operationalContext.RemoveRange(_operationalContext.Consents);
+
+            _clientContext.SaveChanges();
+            _scopeContext.SaveChanges();
+            _operationalContext.SaveChanges();
             return Json("Success");
         }
 
@@ -74,7 +86,7 @@ namespace AuthorizationServer.UI.Home
                     PrefixClientClaims = ct.PrefixClientClaims,
                     RefreshTokenExpiration = ct.RefreshTokenExpiration,
                     RefreshTokenUsage = ct.RefreshTokenUsage,
-                    RequireConsent = false, //设置为true会有问题？
+                    RequireConsent = ct.RequireConsent, //设置为true会有问题？
                     SlidingRefreshTokenLifetime = ct.SlidingRefreshTokenLifetime,
                     UpdateAccessTokenOnRefresh = ct.UpdateAccessTokenClaimsOnRefresh
 

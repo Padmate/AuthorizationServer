@@ -42,6 +42,7 @@ namespace AuthorizationServer
         {
             services.AddEntityFramework()
                 .AddSqlServer()
+                .AddDbContext<OperationalContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]))
                 .AddDbContext<ClientConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]))
                  .AddDbContext<ScopeConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]));
                 
@@ -73,7 +74,7 @@ namespace AuthorizationServer
             services.AddTransient<UserDbContext, UserDbContext>();
             services.AddTransient<ClientConfigurationContext, ClientConfigurationContext>();
             services.AddTransient<ScopeConfigurationContext, ScopeConfigurationContext>();
-
+            services.AddTransient<OperationalContext, OperationalContext>();
 
             // for the UI
             services.AddMvc();
