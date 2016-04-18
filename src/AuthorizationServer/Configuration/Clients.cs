@@ -55,8 +55,8 @@ namespace AuthorizationServer.Configuration
                     //Specifies allowed URIs to return tokens or authorization codes to
                     RedirectUris = new List<string>
                     {
-                         "http://localhost:15142/Home/CallBack" //Client URI
-                         //"http://mvcclient.chinacloudsites.cn/Home/CallBack"
+                         //"http://localhost:15142/Home/CallBack" //Client URI
+                         "http://mvcclient.chinacloudsites.cn/Home/CallBack"
                     },
 
                     AllowedScopes = new List<string>
@@ -80,10 +80,11 @@ namespace AuthorizationServer.Configuration
                     {
                         new Secret("padmate_resourceowner_secret".Sha256())
                     },
-
+                    
                     Flow = Flows.ResourceOwner,
                     //AccessTokenLifteTime must be setted at lease 5 min
                     AccessTokenLifetime = 3600,  //1 hour   
+                    
                     AllowedScopes = new List<string>
                     {
                         StandardScopes.OpenId.Name,

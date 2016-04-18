@@ -13,17 +13,6 @@ namespace AuthorizationServer.Models
         public ClientConfigurationContext(DbContextOptions options)
         : base(options)
         { }
-
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    modelBuilder.HasDefaultSchema("AuthorizationServer");
-        //}
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    var connectionString = Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"];
-        //    optionsBuilder.UseSqlServer(connectionString);
-        //}
+        
     }
 }

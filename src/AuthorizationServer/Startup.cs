@@ -49,7 +49,8 @@ namespace AuthorizationServer
 
             #region IdentityServer4
             var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
-            
+            //var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "DPControl.pfx"),"dpcontrol1234");
+
             var builder = services.AddIdentityServer(options =>
             {
                 options.SigningCertificate = cert;
@@ -72,9 +73,6 @@ namespace AuthorizationServer
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<UserDbContext, UserDbContext>();
-            services.AddTransient<ClientConfigurationContext, ClientConfigurationContext>();
-            services.AddTransient<ScopeConfigurationContext, ScopeConfigurationContext>();
-            services.AddTransient<OperationalContext, OperationalContext>();
 
             // for the UI
             services.AddMvc();
