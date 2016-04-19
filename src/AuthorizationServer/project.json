@@ -25,7 +25,10 @@
     "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
     "EntityFramework.Commands": "7.0.0-rc1-final",
     "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
-    "Serilog.Framework.Logging": "1.0.0-rc1-final-10083"
+    "Serilog.Framework.Logging": "1.0.0-rc1-final-10083",
+    "System.Runtime.Serialization.Json": "4.0.0",
+    "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516",
+    "EntityFramework.Core": "7.0.0-rc2-16740"
   },
 
   "commands": {
@@ -35,7 +38,11 @@
 
   "frameworks": {
     "dnx451": { },
-    "dnxcore50": { }
+    "dnxcore50": {
+      "dependencies": {
+        "runtime.any.System.Private.DataContractSerialization": "4.1.0"
+      }
+    }
   },
 
   "exclude": [
