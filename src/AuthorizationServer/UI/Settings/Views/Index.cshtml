@@ -147,7 +147,7 @@
             toolbar: '#toolbar',
             showRefresh: true,
             search: true,
-            queryParams: ConstructQueryParams,
+            queryParams: ConstructClientQueryParams,
             //queryParamsType: "limit",
             locale: 'en-US',
             singleSelect:true,
@@ -167,19 +167,38 @@
                 field: 'ClientName',
                 title: 'ClientName'
             }
-            ]
+            ],
+            onClickRow: function (row,element) {
+                $("#tbClientId").val(row.ClientId);
+                SetClientDetail(row.Id);
+               
+            }
 
         });
 
     }
 
-    function ConstructQueryParams(param) {
+    function ConstructClientQueryParams(param) {
         var params = {
             limit: param.limit, //页面大小
             offset: param.offset,//偏移数量
             page: param.offset / param.limit, //页码
         };
         return params;
+    }
+
+    function SetClientDetail(id)
+    {
+        $.ajax({
+            type: "get",//使用post方法访问后台
+            dataType: "json",//返回json格式的数据
+            url: "/Settings/GetClientAllDetail",
+            data: { "id": id },
+            async: false,
+            success: function (message) {
+                debugger
+            }
+        });
     }
     
 </script>

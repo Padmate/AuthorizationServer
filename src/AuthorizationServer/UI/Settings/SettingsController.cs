@@ -52,9 +52,23 @@ namespace AuthorizationServer.UI.Settings
             BaseModel baseModel = JsonHandler.DeserializeJsonToObject<BaseModel>(strReqStream);
 
             var allClients = _clientContext.Clients.ToList();
-            var pageClients = _clientContext.Clients.Skip(baseModel.offset).Take(baseModel.limit).ToList();
+            var pageClients = _clientContext.Clients
+                .Skip(baseModel.offset).Take(baseModel.limit).ToList();
             PageResult<Client<Guid>> pageResult = new PageResult<Client<Guid>>(allClients.Count, pageClients);
             return Json(pageResult);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetClientAllDetail(string id)
+        {
+            var result = await _clientContext.Clients
+                .Include(c=>c.ClientSecrets)
+                .Include(c=>c.AllowedScopes)
+                .Include(c=>c.RedirectUris)
+                .FirstOrDefaultAsync(c=>c.Id == new Guid(id));
+
+            //确定返回的类型，如果不确定则会导致ajax 502 Bad Gateway 错误
+            return Json("");
         }
 
         #endregion
