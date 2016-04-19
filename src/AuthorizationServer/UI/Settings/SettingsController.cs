@@ -36,11 +36,24 @@ namespace AuthorizationServer.UI.Settings
 
         #region Clients
         [HttpPost]
-        public ActionResult Client(ClientViewModel model)
+        public ActionResult CreateClient(ClientViewModel model)
         {
             ViewData["ListType"] = "client";
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return View("Index",model);
+            return View("Index");
+        }
+
+        public ActionResult EditClient(ClientViewModel model)
+        {
+            ViewData["ListType"] = "client";
+            return View("Index");
+        }
+
+        public ActionResult DeleteClient(string id)
+        {
+
+            ViewData["ListType"] = "client";
+            return View("Index");
+
         }
 
         public IActionResult GetClientsPageData()
@@ -58,20 +71,31 @@ namespace AuthorizationServer.UI.Settings
             return Json(pageResult);
         }
         
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> GetClientAllDetail(string id)
         {
-            var result = await _clientContext.Clients
+            var client = await _clientContext.Clients
                 .Include(c=>c.ClientSecrets)
                 .Include(c=>c.AllowedScopes)
                 .Include(c=>c.RedirectUris)
                 .FirstOrDefaultAsync(c=>c.Id == new Guid(id));
 
+            ClientModel result = new ClientModel();
+            result.Id = client.Id.ToString() ;
+            result.ClientId = client.ClientId;
+            result.ClientName = client.ClientName;
+            result.ClientUri = client.ClientUri;
+            result.Flow = client.Flow.ToString();
+            result.RequireConsent = client.RequireConsent;
+            result.ClientSecret = client.ClientSecrets.Count > 0 ? client.ClientSecrets.First().Value : string.Empty ;
+            result.AllowedScopes = client.AllowedScopes.Count >0?client.AllowedScopes.Select(c => c.Scope).ToList():null;
+            result.RedirectUris = client.RedirectUris.Count>0 ?client.RedirectUris.Select(c=>c.Uri).ToList():null;
             //确定返回的类型，如果不确定则会导致ajax 502 Bad Gateway 错误
-            return Json("");
+            return Json(result);
         }
 
         #endregion
 
     }
+    
 }

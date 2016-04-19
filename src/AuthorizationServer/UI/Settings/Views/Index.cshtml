@@ -22,9 +22,16 @@
         <div class="tab-content">
             <div class="tab-pane active" id="projects">profile</div>
             <div class="tab-pane" id="clients">
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <!--Form-->
-                    <form asp-controller="Settings" asp-action="Client" class="form-horizontal" role="form">
+                    <form asp-controller="Settings" asp-action="CreateClient" class="form-horizontal" role="form" name="clientForm">
+                        
+                        <div class="form-group hidden">
+                            <label class="col-sm-3 control-label">Id：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" asp-for="Id" id="lbId">
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label for="tbClientId" class="col-sm-3 control-label">ClientID：</label>
                             <div class="col-sm-9">
@@ -64,7 +71,7 @@
                         <div class="form-group">
                             <label for="selFlow" class="col-sm-3 control-label">Flows：</label>
                             <div class="col-sm-9">
-                                <select class="form-control" asp-for="Flow">
+                                <select class="form-control" asp-for="Flow" id="selFlow">
                                     <option value="@Flows.AuthorizationCode">AuthorizationCode Flow</option>
                                     <option value="@Flows.Implicit">Implicit Flow</option>
                                     <option value="@Flows.ResourceOwner">ResourceOwner Flow</option>
@@ -74,7 +81,7 @@
                         <div class="form-group">
                             <label for="taRedirectUri" class="col-sm-3 control-label">RedirectUris：</label>
                             <div class="col-sm-9">
-                                <textarea class="form-control" rows="3" asp-for="RedirectUri"></textarea>
+                                <textarea class="form-control" rows="3" asp-for="RedirectUri" id="taRedirectUris"></textarea>
                             </div>
 
                         </div>
@@ -82,21 +89,23 @@
                             <div class="col-sm-offset-3 col-sm-9">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" asp-for="RequireConsents"> Require Consents
+                                        <input type="checkbox" asp-for="RequireConsents" id="ckRequireConsents"> Require Consents
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <div asp-validation-summary="ValidationSummary.All" class="marginBottom" style="font-size:medium;color:red;"></div>
 
                         <div class="form-group">
                             <div class="col-sm-offset-3 col-sm-9">
-                                <button type="submit" class="btn btn-default">保存</button>
+                                <button type="submit" class="btn btn-warning" id="btnClientSave">保存</button>
+                                <button type="submit" class="btn btn-primary" id="btnClientEdit">修改</button>
+                                <button type="button" class="btn btn-danger" id="btnClientDelete">删除</button>
+
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div id="toolbar"></div>
                     <table id="clientTable"></table>
                 </div>
@@ -115,18 +124,36 @@
         {
             $('#myTab a:first').tab('show');//初始化显示哪个tab
 
-        }else{
-            $('#a'+listType).tab('show');//显示哪个tab
+        } else {
+            //按钮提交后返回
+            $('#a' + listType).tab('show');//显示哪个tab
 
         }
-
-
         $('#myTab a').click(function (e) {
             e.preventDefault();//阻止a链接的跳转行为
             $(this).tab('show');//显示当前选中的链接及关联的content
+            SetClientDetail(null);
+            ChangeClientButtons("add");
         })
+        
+        $("#btnClientEdit").click(function (e) {
+
+            var id = $("#lbId").val(); 
+            clientForm.action = "/Settings/EditClient";
+            clientForm.submit();
+
+        });
+
+        $("#btnClientDelete").click(function (e) {
+            
+            var id = $("#lbId").val();
+            clientForm.action = "/Settings/DeleteClient/?id=" + id;
+            clientForm.submit();
+
+        });
 
         InitClientTable();
+        ChangeClientButtons("add");
     });
 
     
@@ -162,16 +189,13 @@
                 title: 'ClientId',
                 sortable: true
 
-            },
-            {
-                field: 'ClientName',
-                title: 'ClientName'
             }
             ],
             onClickRow: function (row,element) {
-                $("#tbClientId").val(row.ClientId);
-                SetClientDetail(row.Id);
-               
+                var clientDetail = GetClientDetail(row.Id);
+                SetClientDetail(clientDetail);
+                ChangeClientButtons("show");
+
             }
 
         });
@@ -187,18 +211,86 @@
         return params;
     }
 
-    function SetClientDetail(id)
+    function GetClientDetail(id)
     {
+        var result = null;
         $.ajax({
-            type: "get",//使用post方法访问后台
+            type: "post",//使用post方法访问后台
             dataType: "json",//返回json格式的数据
             url: "/Settings/GetClientAllDetail",
             data: { "id": id },
             async: false,
-            success: function (message) {
-                debugger
+            success: function (data) {
+                result = data;
             }
         });
+        return result;
+
     }
-    
+
+    function SetClientDetail(client) {
+
+        if (client != null) {
+            $("#lbId").val(client.Id);
+            $("#tbClientId").val(client.ClientId);
+            $("#tbClientName").val(client.ClientName);
+            $("#tbClientUri").val(client.ClientUri);
+            $("#tbClientSecret").val(client.ClientSecret);
+            ConstructTextAreaClientScopeValue(client.AllowedScopes);
+            $("#selFlow").val(client.Flow);
+            ConstructTextAreaClientRedirectUriValue(client.RedirectUris);
+            $("#ckRequireConsents").attr("checked",client.RequireConsent);
+        } else {
+            $("#lbId").val("");
+            $("#tbClientId").val("");
+            $("#tbClientName").val("");
+            $("#tbClientUri").val("");
+            $("#tbClientSecret").val("");
+            ConstructTextAreaClientScopeValue(null);
+            $("#selFlow").val("");
+            ConstructTextAreaClientRedirectUriValue(null);
+            $("#ckRequireConsents").attr("checked", false);
+
+        }
+    }
+
+    function ConstructTextAreaClientScopeValue(arrScopes) {
+        var textareaValue = "";
+        if(arrScopes !=null)
+        {
+            for (var i = 0; i < arrScopes.length;i++)
+            {
+                textareaValue +=arrScopes[i]+"\r\n"
+            }
+
+        }
+        $("#taScopes").val(textareaValue);
+
+    }
+
+    function ConstructTextAreaClientRedirectUriValue(arrRedirectUris) {
+        var textareaValue = "";
+        if (arrRedirectUris != null) {
+            for (var i = 0; i < arrRedirectUris.length; i++) {
+                textareaValue += arrRedirectUris[i] + "\r\n"
+            }
+        }
+        $("#taRedirectUris").val(textareaValue);
+
+    }
+
+    function ChangeClientButtons(eventType) {
+        if(eventType =="add")
+        {
+            $("#btnClientSave").show();
+            $("#btnClientEdit").hide();
+            $("#btnClientDelete").hide();
+
+        }else
+        {
+            $("#btnClientSave").hide();
+            $("#btnClientEdit").show();
+            $("#btnClientDelete").show();
+        }
+    }
 </script>

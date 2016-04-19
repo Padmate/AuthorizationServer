@@ -8,6 +8,7 @@ namespace AuthorizationServer.UI.Settings
 {
     public class ClientViewModel
     {
+        public string Id { get; set; }
         [Required]
         public string ClientId { get; set; }
 
