@@ -48,8 +48,10 @@ namespace AuthorizationServer
                 
 
             #region IdentityServer4
-            var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
-            //var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "DPControl.pfx"),"dpcontrol1234");
+            //var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
+            var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "DPControlSignCA.pfx"),
+                "signature1234",
+                X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
             var builder = services.AddIdentityServer(options =>
             {
