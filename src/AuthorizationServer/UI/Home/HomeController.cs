@@ -31,6 +31,15 @@ namespace AuthorizationServer.UI.Home
             return View();
         }
 
+        public IActionResult AboutIdsv()
+        {
+            return View();
+        }
+
+        public IActionResult DeveloperDoc()
+        {
+            return View();
+        }
         public IActionResult AddDatabase()
         {
             AddScopes();

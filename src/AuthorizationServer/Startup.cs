@@ -18,6 +18,7 @@ using AuthorizationServer.Models;
 using Serilog;
 using TwentyTwenty.IdentityServer4.EntityFramework7.Extensions;
 using Microsoft.Data.Entity;
+using Newtonsoft.Json;
 
 namespace AuthorizationServer
 {
@@ -45,7 +46,8 @@ namespace AuthorizationServer
                 .AddDbContext<OperationalContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]))
                 .AddDbContext<ClientConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]))
                  .AddDbContext<ScopeConfigurationContext>(o => o.UseSqlServer(Startup.Configuration["Data:AuthorizationServerConnection:ConnectionString"]));
-                
+
+            
 
             #region IdentityServer4
             //var cert = new X509Certificate2(Path.Combine(_environment.ApplicationBasePath, "idsrv4test.pfx"), "idsrv3test");
@@ -56,6 +58,9 @@ namespace AuthorizationServer
             var builder = services.AddIdentityServer(options =>
             {
                 options.SigningCertificate = cert;
+                options.Endpoints.EnableTokenRevocationEndpoint = true;
+                options.Endpoints.EnableIdentityTokenValidationEndpoint = true;
+                options.EnableWelcomePage = false;
             });
 
 
@@ -66,18 +71,20 @@ namespace AuthorizationServer
             .RegisterOperationalStores()
             .RegisterClientStore<Guid, ClientConfigurationContext>()
             .RegisterScopeStore<Guid, ScopeConfigurationContext>();
-
+            
             //Configure User
             builder.Services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
             builder.Services.AddTransient<IProfileService, ProfileService>();
+           
+            builder.Services.AddTransient<ICorsPolicyService, AllowAllCorsPolicy>();
             //builder.AddCustomGrantValidator<CustomGrantValidator>();
+            builder.Services.AddCoreServices();
             #endregion
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<UserDbContext, UserDbContext>();
 
             // for the UI
-            services.AddMvc();
             services
                 .AddMvc()
                 .AddRazorOptions(razor =>
@@ -104,7 +111,7 @@ namespace AuthorizationServer
             app.UseIISPlatformHandler();
 
             app.UseIdentityServer();
-            
+
 
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();

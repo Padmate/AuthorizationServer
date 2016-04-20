@@ -47,6 +47,7 @@ namespace AuthorizationServer.UI.Settings
                 client.ClientName = model.ClientName;
                 client.ClientUri = model.ClientUri;
                 client.Flow = (Flows)(System.Convert.ToInt32(model.Flow));
+               
                 if (!string.IsNullOrEmpty(model.ClientSecret))
                 {
                     client.ClientSecrets = new List<Secret>()

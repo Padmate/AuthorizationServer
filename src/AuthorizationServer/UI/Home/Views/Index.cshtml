@@ -1,37 +1,78 @@
 ﻿
-<div class="welcome-page">
-    <div class="row page-header">
-        <div class="col-sm-10">
-            <h1>
-                <img class="icon" src="~/icon.jpg">
-                Welcome to IdentityServer4
-                @*<small>(build {version})</small>*@
-            </h1>
-        </div>
-    </div>
+<script>
+    $(document).ready(function () {
+       
 
-    <div class="row">
-        <div class="col-sm-8">
-            <div>
-                <a class="btn btn-danger" href="/Settings/Index">Configration &raquo;</a>
-            
+        $('#myCarousel').carousel({
+            interval: 8000,
+            pause:'cycle'
+        });
+
+
+
+    });
+
+
+</script>
+
+<div class="container body-content">
+    <div id="myCarousel" class="carousel slide">
+        <!-- 轮播（Carousel）指标 -->
+        <ol class="carousel-indicators">
+            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel" data-slide-to="1"></li>
+            <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>
+        <!-- 轮播（Carousel）项目 -->
+        <div class="carousel-inner">
+            <div class="item active">
+                <img src="~/cloudserver.jpg" style="height:300px;width:100%" alt="First slide">
             </div>
+            <div class="item">
+                <img src="~/bigdata.jpg" style="height:300px; width:100%" alt="Second slide">
+            </div>
+            <div class="item">
+                <img src="~/sso.jpg" style="height:300px;width:100%;" alt="Third slide">
+            </div>
+        </div>
+        <!-- 轮播（Carousel）导航 -->
+        <a class="carousel-control left" href="#myCarousel"
+           data-slide="prev">&lsaquo;</a>
+        <a class="carousel-control right" href="#myCarousel"
+           data-slide="next">&rsaquo;</a>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Getting start to build you software here</h2>
 
-            <p>
-                
-                IdentityServer publishes a
-                <a href="~/.well-known/openid-configuration">discovery document</a>
-                where you can find metadata and links to all the endpoints, key material, etc.
-            </p>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-8">
+        <div class="col-md-4">
+            <h2>API</h2>
             <p>
-                Here are links to the
-                <a href="https://github.com/identityserver/IdentityServer4">source code repository</a>,
-                and <a href="https://github.com/identityserver/IdentityServer4.Samples">ready to use samples</a>.
+                Get started with one of our guides, or jump straight into the API documentation. 
             </p>
+            <p>
+                <environment names="Development">
+                    <a class="btn btn-primary" href="http://localhost:37936/">Learn More &raquo;</a>
+                </environment>
+                <environment names="Staging,Production">
+                    <a class="btn btn-primary" href="http://dpcontrol.chinacloudsites.cn/">Learn More &raquo;</a>
+                 </environment>
+            </p>
+        </div>
+        <div class="col-md-4">
+            <h2>Developers</h2>
+            <p>Learn how to develop with our Apis</p>
+            <p><a class="btn btn-danger" href="/Home/DeveloperDoc">Learn More &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Idsv4</h2>
+            <p>Konw more about IdentityServer4</p>
+            <p><a class="btn btn-success" href="/Home/AboutIdsv">Learn More &raquo;</a></p>
         </div>
     </div>
 </div>
+
+
