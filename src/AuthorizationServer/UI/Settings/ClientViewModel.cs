@@ -12,10 +12,16 @@ namespace AuthorizationServer.UI.Settings
         [Required]
         public string ClientId { get; set; }
 
+        [Required]
         public string ClientName { get; set; }
         public string ClientUri { get; set; }
+
+        [Required]
         public string ClientSecret { get; set; }
+
+        [Required]
         public string Flow { get; set; }
+
         public string RedirectUri { get; set; }
         
         public List<string> RedirectUris {

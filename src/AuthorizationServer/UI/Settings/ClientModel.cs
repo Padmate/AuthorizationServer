@@ -11,7 +11,7 @@ namespace AuthorizationServer.UI.Settings
         public string ClientId { get; set; }
         public string ClientName { get; set; }
         public string ClientUri { get; set; }
-        public string Flow { get; set; }
+        public Int32 Flow { get; set; }
         public bool RequireConsent { get; set; }
 
         public string ClientSecret { get; set; }

@@ -1,6 +1,7 @@
 ﻿@using IdentityServer4.Core.Models;
+@using AuthorizationServer.Models;
 @model AuthorizationServer.UI.Settings.ClientViewModel
-
+@inject  ScopeConfigurationContext _scopeContext
 
 
 <style>
@@ -15,12 +16,14 @@
         <ul class="nav nav-tabs" id="myTab">
             <li class="active"><a id="aproject" href="#projects">Projects</a></li>
             <li><a id="aclient" href="#clients">Clients</a></li>
-            <li><a href="#scopes">Scopes</a></li>
+            <li><a id="ascope" href="#scopes">Scopes</a></li>
         </ul>
     </div>
     <div class="col-md-9">
         <div class="tab-content">
-            <div class="tab-pane active" id="projects">profile</div>
+            <div class="tab-pane active" id="projects">
+                <h2>请确保有已经初始化Scopes后再新增Clients</h2>
+            </div>
             <div class="tab-pane" id="clients">
                 <div class="col-md-8">
                     <!--Form-->
@@ -35,30 +38,26 @@
                         <div class="form-group">
                             <label for="tbClientId" class="col-sm-3 control-label">ClientID：</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientId" id="tbClientId"
-                                       placeholder="ClientID" required
+                                <input type="text" class="form-control" asp-for="ClientId" id="tbClientId" required
                                        oninvalid="setCustomValidity('ClientId is required')" oninput="setCustomValidity('')">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="tbClientName" class="col-sm-3 control-label">ClientName：</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientName" id="tbClientName"
-                                       placeholder="ClientName">
+                                <input type="text" class="form-control" asp-for="ClientName" required id="tbClientName">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="tbClientUri" class="col-sm-3 control-label">ClientUri：</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientUri" id="tbClientUri"
-                                       placeholder="ClientUri">
+                                <input type="text" class="form-control" asp-for="ClientUri" id="tbClientUri">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="tbClientSecret" class="col-sm-3 control-label">ClientSecret：</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientSecret" id="tbClientSecret"
-                                       placeholder="ClientSecret">
+                                <input type="text" class="form-control" asp-for="ClientSecret" id="tbClientSecret">
                             </div>
                         </div>
                         <div class="form-group">
@@ -71,10 +70,10 @@
                         <div class="form-group">
                             <label for="selFlow" class="col-sm-3 control-label">Flows：</label>
                             <div class="col-sm-9">
-                                <select class="form-control" asp-for="Flow" id="selFlow">
-                                    <option value="@Flows.AuthorizationCode">AuthorizationCode Flow</option>
-                                    <option value="@Flows.Implicit">Implicit Flow</option>
-                                    <option value="@Flows.ResourceOwner">ResourceOwner Flow</option>
+                                <select class="form-control" asp-for="Flow" id="selFlow" required>
+                                    <option value="@System.Convert.ToInt32(Flows.AuthorizationCode)">@Flows.AuthorizationCode</option>
+                                    <option value="@System.Convert.ToInt32(Flows.Implicit)">@Flows.Implicit</option>
+                                    <option value="@System.Convert.ToInt32(Flows.ResourceOwner)">@Flows.ResourceOwner</option>
                                 </select>
                             </div>
                         </div>
@@ -110,7 +109,30 @@
                     <table id="clientTable"></table>
                 </div>
             </div>
-            <div class="tab-pane" id="scopes">messages.</div>
+            <div class="tab-pane" id="scopes">
+                
+                <div class="col-md-4">
+                    @if (_scopeContext.Scopes.Count() > 0)
+                    {
+
+                        <a class="btn btn-success disabled" href="/Settings/CreateScopes">AddScopes &raquo;</a>
+                        <br />
+                        <br />
+                        <a class="btn btn-danger" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-success" href="/Settings/CreateScopes">AddScopes &raquo;</a>
+                        <br />
+                        <br />
+                        <a class="btn btn-danger disabled" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
+                    }
+                    
+                </div>
+                <div class="col-md-8">
+                    <table id="scopeTable"></table>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -119,16 +141,25 @@
 <script>
 
     var listType = '@ViewData["ListType"]';
+    var operateType = '@ViewData["operateType"]';
+
     $(document).ready(function () {
-        if (listType == "")
-        {
+        if (listType == "") {
             $('#myTab a:first').tab('show');//初始化显示哪个tab
 
-        } else {
-            //按钮提交后返回
-            $('#a' + listType).tab('show');//显示哪个tab
 
+        }else {
+
+            $('#a' + listType).tab('show');//显示哪个tab
+            if (operateType == "create") {
+
+            } else if (operateType == "edit") {
+
+            } else if (operateType == "delete") {
+
+            }
         }
+
         $('#myTab a').click(function (e) {
             e.preventDefault();//阻止a链接的跳转行为
             $(this).tab('show');//显示当前选中的链接及关联的content
@@ -153,6 +184,7 @@
         });
 
         InitClientTable();
+        InitScopeTable();
         ChangeClientButtons("add");
     });
 
@@ -292,5 +324,70 @@
             $("#btnClientEdit").show();
             $("#btnClientDelete").show();
         }
+    }
+
+    function InitScopeTable() {
+        $('#scopeTable').bootstrapTable({
+            height: 500,
+            method: 'post',                 //The method type to request remote data.
+            url: '/Settings/GetScopesPageData',
+            dataType: "json",               //The type of data that you are expecting back from the server.
+            contentType: 'application/json',
+            pagination: true,               //True to show a pagination toolbar on table bottom.
+            pageSize: 10,                   //初始化每页显示几条
+            pageNumber: 1,                   //初始化在第几页
+            pageList: [10, 25, 50, 100, 200, 'All'],
+            sidePagination: "server",       //服务端请求
+            idField: 'Id',
+            //toolbar: '#toolbar',
+            showRefresh: true,
+            search: true,
+            queryParams: ConstructScopetQueryParams,
+            //queryParamsType: "limit",
+            locale: 'en-US',
+            singleSelect: true,
+            columns: [
+            {
+                field: 'Id',
+                title: 'Id',
+                visible: false,
+            },
+            {
+                field: 'Name',
+                title: 'Name',
+                sortable: true
+
+            },
+            {
+                field: 'DisplayName',
+                title: 'DisplayName',
+                sortable: true
+
+            },
+            {
+                field: 'Type',
+                title: 'Type',
+                sortable: true
+
+            },
+            {
+                field: 'Description',
+                title: 'Description',
+                sortable: true
+
+            }
+            ]
+
+        });
+
+    }
+
+    function ConstructScopetQueryParams(param) {
+        var params = {
+            limit: param.limit, //页面大小
+            offset: param.offset,//偏移数量
+            page: param.offset / param.limit, //页码
+        };
+        return params;
     }
 </script>

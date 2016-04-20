@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TwentyTwenty.IdentityServer4.EntityFramework7.Entities;
 using Microsoft.Data.Entity;
+using AuthorizationServer.Configuration;
 
 namespace AuthorizationServer.UI.Settings
 {
@@ -38,18 +39,185 @@ namespace AuthorizationServer.UI.Settings
         [HttpPost]
         public ActionResult CreateClient(ClientViewModel model)
         {
+            try
+            {
+                #region Add Client
+                Client client = new Client();
+                client.ClientId = model.ClientId;
+                client.ClientName = model.ClientName;
+                client.ClientUri = model.ClientUri;
+                client.Flow = (Flows)(System.Convert.ToInt32(model.Flow));
+                if (!string.IsNullOrEmpty(model.ClientSecret))
+                {
+                    client.ClientSecrets = new List<Secret>()
+                {
+                    new Secret(model.ClientSecret.Sha256())
+                };
+                }
+                if (!string.IsNullOrEmpty(model.RedirectUri))
+                {
+                    client.RedirectUris = model.RedirectUri.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+                client.AllowedScopes = new List<string>
+            {
+                StandardScopes.OpenId.Name,
+                StandardScopes.Profile.Name,
+                StandardScopes.Email.Name,
+                StandardScopes.Roles.Name,
+                "dpcontrolapiscope"
+            };
+
+                AddClients(client);
+                #endregion
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(string.Empty, "新增失败："+e.Message);
+            }
+
             ViewData["ListType"] = "client";
-            return View("Index");
+            ViewData["operateType"] = "create";
+
+            return View("Index",model);
         }
 
+        private void AddClients(Client ct)
+        {
+            var client = new Client<Guid>()
+            {
+                AbsoluteRefreshTokenLifetime = ct.AbsoluteRefreshTokenLifetime,
+                AccessTokenLifetime = ct.AccessTokenLifetime,
+                AccessTokenType = ct.AccessTokenType,
+                AllowAccessToAllGrantTypes = ct.AllowAccessToAllCustomGrantTypes,
+                AllowAccessToAllScopes = ct.AllowAccessToAllScopes,
+                AllowClientCredentialsOnly = ct.AllowClientCredentialsOnly,
+                AllowPromptNone = ct.AllowPromptNone,
+                AllowRememberConsent = ct.AllowRememberConsent,
+                AlwaysSendClientClaims = ct.AlwaysSendClientClaims,
+                AuthorizationCodeLifetime = ct.AuthorizationCodeLifetime,
+                ClientId = ct.ClientId,
+                ClientName = ct.ClientName,
+                ClientUri = ct.ClientUri,
+                EnableLocalLogin = ct.EnableLocalLogin,
+                Enabled = ct.Enabled,
+                Flow = ct.Flow,
+                IdentityTokenLifetime = ct.IdentityTokenLifetime,
+                IncludeJwtId = ct.IncludeJwtId,
+                LogoUri = ct.LogoUri,
+                LogoutSessionRequired = ct.LogoutSessionRequired,
+                LogoutUri = ct.LogoutUri,
+                PrefixClientClaims = ct.PrefixClientClaims,
+                RefreshTokenExpiration = ct.RefreshTokenExpiration,
+                RefreshTokenUsage = ct.RefreshTokenUsage,
+                RequireConsent = ct.RequireConsent, //设置为true会有问题？
+                SlidingRefreshTokenLifetime = ct.SlidingRefreshTokenLifetime,
+                UpdateAccessTokenOnRefresh = ct.UpdateAccessTokenClaimsOnRefresh
+
+            };
+            client.ClientSecrets = new List<ClientSecret<Guid>>();
+            client.AllowedScopes = new List<ClientScope<Guid>>();
+            client.RedirectUris = new List<ClientRedirectUri<Guid>>();
+            client.IdentityProviderRestrictions = new List<ClientProviderRestriction<Guid>>();
+            client.PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri<Guid>>();
+            client.AllowedCustomGrantTypes = new List<ClientCustomGrantType<Guid>>();
+            client.Claims = new List<ClientClaim<Guid>>();
+            client.AllowedCorsOrigins = new List<ClientCorsOrigin<Guid>>();
+
+            //Add Secrets
+            foreach (var secret in ct.ClientSecrets)
+            {
+                var clientSecret = new ClientSecret<Guid>()
+                {
+                    Description = secret.Description,
+                    Expiration = secret.Expiration.HasValue ? (DateTime?)secret.Expiration.Value.DateTime : null,
+                    Type = secret.Type,
+                    Value = secret.Value
+                };
+                client.ClientSecrets.Add(clientSecret);
+            }
+            //Add Scopes
+            foreach (var scope in ct.AllowedScopes)
+            {
+                var allowedScope = new ClientScope<Guid>()
+                {
+                    Scope = scope
+                };
+                client.AllowedScopes.Add(allowedScope);
+            }
+
+            //Add RedirectUris
+            foreach (var redirectUri in ct.RedirectUris)
+            {
+                var clientRedirectUri = new ClientRedirectUri<Guid>()
+                {
+                    Uri = redirectUri
+                };
+                client.RedirectUris.Add(clientRedirectUri);
+            }
+            //Add ProviderRestrictions
+            foreach (var provider in ct.IdentityProviderRestrictions)
+            {
+                var clientProviderRestriction = new ClientProviderRestriction<Guid>()
+                {
+                    Provider = provider
+                };
+                client.IdentityProviderRestrictions.Add(clientProviderRestriction);
+            }
+            //Add ClientPostLogoutRedirectUri
+            foreach (var postLogoutRedirectUri in ct.PostLogoutRedirectUris)
+            {
+                var clientPostLogoutRedirectUri = new ClientPostLogoutRedirectUri<Guid>()
+                {
+                    Uri = postLogoutRedirectUri
+                };
+                client.PostLogoutRedirectUris.Add(clientPostLogoutRedirectUri);
+            }
+            //Add ClientCustomGrantTypes
+            foreach (var customGrantType in ct.AllowedCustomGrantTypes)
+            {
+                var clientCustomerGrantType = new ClientCustomGrantType<Guid>()
+                {
+                    GrantType = customGrantType
+                };
+                client.AllowedCustomGrantTypes.Add(clientCustomerGrantType);
+            }
+            //Add ClientClaims
+            foreach (var claim in ct.Claims)
+            {
+                var clientClaim = new ClientClaim<Guid>()
+                {
+                    Type = claim.Type,
+                    Value = claim.Value
+                };
+                client.Claims.Add(clientClaim);
+            }
+            //Add ClientCorsOrigins
+            foreach (var corsOrigin in ct.AllowedCorsOrigins)
+            {
+                var clientCorsOrigin = new ClientCorsOrigin<Guid>()
+                {
+                    Origin = corsOrigin
+                };
+                client.AllowedCorsOrigins.Add(clientCorsOrigin);
+            }
+            _clientContext.Clients.Add(client);
+            _clientContext.SaveChanges();
+        }
+
+
+        [HttpPost]
         public ActionResult EditClient(ClientViewModel model)
         {
             ViewData["ListType"] = "client";
             return View("Index");
         }
 
+        [HttpPost]
         public ActionResult DeleteClient(string id)
         {
+            var client = _clientContext.Clients.FirstOrDefault(c=>c.Id == new Guid(id));
+            _clientContext.Remove(client);
+            _clientContext.SaveChanges();
 
             ViewData["ListType"] = "client";
             return View("Index");
@@ -85,7 +253,7 @@ namespace AuthorizationServer.UI.Settings
             result.ClientId = client.ClientId;
             result.ClientName = client.ClientName;
             result.ClientUri = client.ClientUri;
-            result.Flow = client.Flow.ToString();
+            result.Flow = System.Convert.ToInt32(client.Flow);
             result.RequireConsent = client.RequireConsent;
             result.ClientSecret = client.ClientSecrets.Count > 0 ? client.ClientSecrets.First().Value : string.Empty ;
             result.AllowedScopes = client.AllowedScopes.Count >0?client.AllowedScopes.Select(c => c.Scope).ToList():null;
@@ -96,6 +264,102 @@ namespace AuthorizationServer.UI.Settings
 
         #endregion
 
+        #region Scopes
+        public ActionResult CreateScopes()
+        {
+            AddScopes();
+            ViewData["ListType"] = "scope";
+            ViewData["operateType"] = "create";
+
+            return View("Index");
+        }
+
+        private void AddScopes()
+        {
+            foreach (var sc in Scopes.Get())
+            {
+                var scope = new Scope<Guid>()
+                {
+
+                    ClaimsRule = sc.ClaimsRule,
+                    Description = sc.Description,
+                    DisplayName = sc.DisplayName,
+                    Emphasize = sc.Emphasize,
+                    Enabled = sc.Enabled,
+                    IncludeAllClaimsForUser = sc.IncludeAllClaimsForUser,
+                    Name = sc.Name,
+                    Required = sc.Required,
+                    ShowInDiscoveryDocument = sc.ShowInDiscoveryDocument,
+                    Type = (int)sc.Type,
+                    AllowUnrestrictedIntrospection = sc.AllowUnrestrictedIntrospection,
+
+                };
+                scope.ScopeClaims = new List<ScopeClaim<Guid>>();
+                scope.ScopeSecrets = new List<ScopeSecret<Guid>>();
+
+                //Add ScopeClaims
+                foreach (var claim in sc.Claims)
+                {
+                    var scopeClaim = new ScopeClaim<Guid>()
+                    {
+
+                        AlwaysIncludeInIdToken = claim.AlwaysIncludeInIdToken,
+                        Description = claim.Description,
+                        Name = claim.Name
+
+                    };
+                    scope.ScopeClaims.Add(scopeClaim);
+
+                }
+
+                //AddScopeSecrets
+                foreach (var secret in sc.ScopeSecrets)
+                {
+                    var scopeSecret = new ScopeSecret<Guid>()
+                    {
+                        Description = secret.Description,
+                        Expiration = secret.Expiration.HasValue ? (DateTime?)secret.Expiration.Value.DateTime : null,
+                        Type = secret.Type,
+                        Value = secret.Value
+
+                    };
+                    scope.ScopeSecrets.Add(scopeSecret);
+
+                }
+
+                _scopeContext.Scopes.Add(scope);
+
+
+            }
+            _scopeContext.SaveChanges();
+        }
+
+        public ActionResult DeleteScopes()
+        {
+            _scopeContext.RemoveRange(_scopeContext.Scopes);
+            _scopeContext.SaveChanges();
+
+            ViewData["ListType"] = "scope";
+            ViewData["operateType"] = "create";
+
+            return View("Index");
+        }
+
+        public IActionResult GetScopesPageData()
+        {
+            //get params
+            HttpRequest rq = Request;
+            StreamReader srRequest = new StreamReader(rq.Body);
+            String strReqStream = srRequest.ReadToEnd();
+            BaseModel baseModel = JsonHandler.DeserializeJsonToObject<BaseModel>(strReqStream);
+
+            var allScopes = _scopeContext.Scopes.ToList();
+            var pageScopes = _scopeContext.Scopes
+                .Skip(baseModel.offset).Take(baseModel.limit).ToList();
+            PageResult<Scope<Guid>> pageResult = new PageResult<Scope<Guid>>(allScopes.Count, pageScopes);
+            return Json(pageResult);
+        }
+        #endregion
     }
-    
+
 }
