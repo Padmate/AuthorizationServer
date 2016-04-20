@@ -19,6 +19,7 @@ using Serilog;
 using TwentyTwenty.IdentityServer4.EntityFramework7.Extensions;
 using Microsoft.Data.Entity;
 using Newtonsoft.Json;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace AuthorizationServer
 {
@@ -83,6 +84,20 @@ namespace AuthorizationServer
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<UserDbContext, UserDbContext>();
+
+            #region  Add Identity
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonLetterOrDigit = false;
+                options.Password.RequireUppercase = false;
+            })
+            .AddEntityFrameworkStores<UserDbContext>()
+            .AddDefaultTokenProviders();
+            
+            #endregion
 
             // for the UI
             services
