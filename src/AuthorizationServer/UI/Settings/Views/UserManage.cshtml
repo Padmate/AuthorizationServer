@@ -1,1 +1,309 @@
-﻿user ma
+﻿@using Microsoft.AspNet.Identity.EntityFramework
+@using Microsoft.AspNet.Identity
+@inject RoleManager<IdentityRole> roleManager
+<div class="row">
+    <div class="col-md-9">
+        <div id="userToolbar">
+            <a class="btn btn-primary" href='#UserAddModel' data-toggle='modal'>
+                <span class="iconfa-book">Add</span>
+            </a>
+            <button id="btnUserEdit" class="btn btn-success">
+                <i class="glyphicon glyphicon-plus"></i>Edit
+            </button>
+            <button id="btnUserDelete" class="btn btn-danger">
+                <i class="glyphicon glyphicon-remove"></i> Delete
+            </button>
+
+        </div>
+        <table id="roleTable"></table>
+    </div>
+    <div class="col-md-3"></div>
+
+</div>
+
+<div class="modal fade" id="UserAddModel" tabindex="-1" role="dialog"
+     aria-labelledby="userModalLabel" aria-hidden="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="userModalLabel">
+                    Add Users
+                </h4>
+            </div>
+            <div class="modal-body" style="height:400px;overflow-y:auto">
+              
+                <div class="span4">
+                    <div>
+                        <label class="col-md-2 modallabel">Name</label>
+                        <span class="field">
+                            <input type="text" id="tbAddName" class="input-large">
+                        </span>
+                    </div>
+                    <br />
+                    <div>
+                        <label class="col-md-2 modallabel">Password</label>
+                        <span class="field">
+                            <input type="text" id="tbAddPassword" class="input-large">
+                        </span>
+                    </div>
+                    <br />
+                    <div>
+                        <label class="col-md-2 modallabel">Roles</label>
+                        <span class="field">
+                            <textarea  rows="3" id="tbAddRoles" class="col-md-8"></textarea>
+                        </span>
+                        <div style="clear:both"></div>
+                    </div>
+                    
+                    <br />
+                    <div  style="margin:10px 90px;">
+                        @{
+                            var allRoles = roleManager.Roles.ToList();
+                            foreach (var role in allRoles)
+                            {
+                                <input name="ckRole" id="tb'@role'" class="rolecheck" value=@role.Name type="checkbox" style="margin:0 5px;" />
+                                <label for="tb'@role'" style="width:100px;">@role.Name</label>
+                                <br/>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn">取消</button>
+                <button data-dismiss="modal" class="btn btn-primary" id="btnAdd">保存</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        InitTable();
+        InitToolBarButton();
+
+        // model hide event
+        jQuery('#UserAddModel').on('hide.bs.modal', function () {
+            
+            // clear input content
+            jQuery("#tbAddName").val("");
+        });
+    });
+
+    $(".rolecheck:checkbox").click(function () {
+
+        var chooseRoles = "";
+        $("[name = ckRole]:checkbox").each(function () {
+            if ($(this).is(":checked")) {
+                chooseRoles += $(this).attr("value") + ";";
+
+            }
+
+        });
+        $("#tbAddRoles").val(chooseRoles);
+    });
+
+    function InitTable()
+    {
+        $('#roleTable').bootstrapTable({
+            height:500,
+            method: 'post',                 //The method type to request remote data.
+            url: '/Settings/GetUserPageData',
+            dataType: "json",               //The type of data that you are expecting back from the server.
+            contentType:'application/json',
+            pagination: true,               //True to show a pagination toolbar on table bottom.
+            pageSize: 10,                   //初始化每页显示几条
+            pageNumber:1,                   //初始化在第几页
+            pageList: [10,25,50,100,200,'All'],
+            sidePagination: "server",       //服务端请求
+            idField:'Id',
+            toolbar:'#userToolbar',
+            showRefresh:true,
+            search:true,
+            queryParams: ConstructQueryParams,
+            //queryParamsType: "limit",
+            locale:'en-US',
+            columns: [{
+                checkbox: true
+            },
+            {
+                field: 'Id',
+                title: 'Id',
+                visible:false,
+            },
+            {
+                field: 'UserName',
+                title: 'UserName',
+                sortable: true
+
+            },
+            {
+                field: 'Roles',
+                title: 'Roles',
+                width:'60%',
+                formatter: function (value, row, index) {
+
+                    return ConstructRolesByUserName(row.UserName);
+                }
+            }
+            ]
+        });
+    }
+
+    function ConstructQueryParams(param)
+    {
+        var params = {
+            limit: param.limit, //页面大小
+            offset:param.offset,//偏移数量
+            page: param.offset/param.limit, //页码
+
+        };
+        return params;
+    }
+
+    function InitToolBarButton()
+    {
+        $("#btnAdd").click(function () {
+            var userName = jQuery("#tbAddName").val();
+            var password = jQuery("#tbAddPassword").val();
+            var roles = jQuery("#tbAddRoles").val();
+
+            if (userName.trim() == "") {
+                layer.alert("Please Input User Name", {
+                    skin: 'layui-layer-molv'
+                          , closeBtn: 0
+                          , shift: 5 //动画类型
+                });
+                return;
+            }
+
+            var obj =
+            {
+                UserName: userName,
+                Password: password,
+                Roles: roles
+            }
+
+            jQuery.ajax({
+                type: "post",//使用post方法访问后台
+                dataType: "json",//返回json格式的数据
+                url: "/Settings/CreateUser",
+                data: obj,
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        //clost model
+                        CloseAddModel();
+                        //重新加载
+                        Search();
+                    } else {
+
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-lan'
+                            , closeBtn: 0
+                            , shift: 4 //动画类型
+                        });
+                        return;
+
+                    }
+
+                }
+            });
+        });
+
+        $("#btnUserEdit").click(function () {
+            layer.alert("Edit is not enabled", {
+                skin: 'layui-layer-molv'
+                           , closeBtn: 0
+                           , shift: 5 //动画类型
+            });
+        });
+
+        $("#btnUserDelete").click(function () {
+
+            var selections = $('#roleTable').bootstrapTable('getSelections');
+            if(selections.length == 0)
+            {
+                layer.alert("Please select records", {
+                    skin: 'layui-layer-molv'
+                            ,closeBtn: 0
+                            ,shift: 5 //动画类型
+                });
+                return ;
+            }
+
+            var userIds =[];
+            for(var i=0;i<selections.length;i++)
+            {
+                var id = selections[i].Id;
+                userIds.push(id);
+            }
+
+            //delete records
+            var jsonUserId = JSON.stringify(userIds);
+            $.ajax({
+                type: "get",//使用get方法访问后台
+                dataType: "json",//返回json格式的数据
+                url: "/Settings/BachDeleteByUserId",
+                data: {"UserIds":jsonUserId},
+                async:false,
+                success: function(message){
+                    if(message.Success)
+                    {
+                        Search();
+                    }else{
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            ,closeBtn: 0
+                            ,shift: 5 //动画类型
+                        });
+                    }
+
+                }
+            });
+        });
+    }
+
+    function ConstructRolesByUserName(userName) {
+
+        var roleNames = '';
+        $.ajax({
+            type: "get",//使用get方法访问后台
+            dataType: "json",//返回json格式的数据
+            url: "/Settings/GetRolesByUserName",
+            data: { "UserName": userName },
+            async: false,
+            success: function (data) {
+
+                for (var i = 0; i < data.length; i++) {
+                    if (i == 0) {
+                        roleNames += data[i];
+
+                    } else {
+                        roleNames += "、" + data[i];
+
+                    }
+                }
+
+            }
+        });
+        return roleNames;
+
+    }
+    //clost model
+    function CloseAddModel() {
+
+        jQuery('#UserAddModel').modal('hide');
+    }
+
+    function Search() {
+        //重新加载
+        $('#roleTable').bootstrapTable('refresh');
+    }
+
+</script>   

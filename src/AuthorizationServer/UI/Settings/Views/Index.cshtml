@@ -14,19 +14,20 @@
 <div class="row">
     <div class="col-md-3">
         <ul class="nav nav-tabs" id="myTab">
-            <li class="active"><a id="aclient" href="#clients">Clients</a></li>
-            <li><a id="ascope" href="#scopes">Scopes</a></li>
-            <li><a id="arole" href="#roles">Roles</a></li>
-            <li><a id="auser" href="#users">Users</a></li>
-
+            <li class="active"><a id="UserManage" href="#divUserManage">Users</a></li>
+            <li><a id="RoleManage" href="#divRoleManage">Roles</a></li>
+            <li><a id="ClientManage" href="#divClientManage">Clients</a></li>
+            <li><a id="ScopeManage" href="#divScopeManage">Scopes</a></li>
+            
         </ul>
     </div>
     <div class="col-md-9">
         <div class="tab-content">
-            <div class="tab-pane active" id="clients"></div>
-            <div class="tab-pane" id="scopes"></div>
-            <div class="tab-pane" id="roles"></div>
-            <div class="tab-pane" id="users"> </div>
+            <div class="tab-pane active" id="divUserManage"> </div>
+            <div class="tab-pane" id="divRoleManage"></div>
+            <div class="tab-pane" id="divClientManage"></div>
+            <div class="tab-pane" id="divScopeManage"></div>
+            
         </div>
 
     </div>
@@ -34,12 +35,10 @@
 
 <script>
 
-
     $(document).ready(function () {
          
-        var tabUrl = "/Settings/ClientManage";
-        $("#clients").load(tabUrl);
-         $('#myTab a:first').tab('show');//初始化显示哪个tab
+        LoadTab("divUserManage", "/Settings/UserManage");
+        $('#myTab a:first').tab('show');//初始化显示哪个tab
        
         $('#myTab a').click(function (e) {
             
@@ -47,28 +46,19 @@
             $(this).tab('show');//显示当前选中的链接及关联的content
             //加载链接内容
             var aId = this.id;
-            if (aId == "aclient")
-            {
-                var tabUrl = "/Settings/ClientManage";
-                $("#clients").load(tabUrl);
-            } else if (aId == "ascope")
-            {
-                var tabUrl = "/Settings/ScopeManage";
-                $("#scopes").load(tabUrl);
-            } else if (aId == "arole")
-            {
-                var tabUrl = "/Settings/RoleManage";
-                $("#roles").load(tabUrl);
-
-            } else if (aId == "auser") {
-                var tabUrl = "/Settings/UserManage";
-                $("#users").load(tabUrl);
-            }
+            var tabUrl = "/Settings/" + aId;
+            var tabId = "div"+aId;
+            LoadTab(tabId,tabUrl);
 
            
         })
         
     });
 
-    
+    function LoadTab(id,url) {
+        //加载两次，否则右上角的下拉会无效？
+        $("#" + id).load(url);
+        $("#" + id).load(url);
+    }
+
 </script>

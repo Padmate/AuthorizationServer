@@ -16,7 +16,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace AuthorizationServer.UI.Settings
 {
-    public class SettingsController:Controller
+    public class SettingsController:BaseController
     {
         private ScopeConfigurationContext _scopeContext;
         private ClientConfigurationContext _clientContext;
@@ -402,13 +402,7 @@ namespace AuthorizationServer.UI.Settings
             return Json(pageResult);
             
         }
-
-        // GET: /Account/Register
-        [HttpGet]
-        public IActionResult CreateRole()
-        {
-            return View();
-        }
+        
 
         //
         // POST: /Account/Register
@@ -444,7 +438,7 @@ namespace AuthorizationServer.UI.Settings
             Message message = new Message();
             message.Success = true;
 
-            List<string> roleIds = JsonHandler.UnJson<List<string>>(RoleIds);
+            List<string> roleIds = JsonHandler.DeserializeJsonToList<string>(RoleIds);
             foreach (string roleid in roleIds)
             {
                 var role = await _roleManager.FindByIdAsync(roleid);
@@ -457,10 +451,109 @@ namespace AuthorizationServer.UI.Settings
 
         #endregion
 
+
         #region User
         public ActionResult UserManage()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Get User Paging Data
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult GetUserPageData()
+        {
+            //get params
+            HttpRequest rq = Request;
+            StreamReader srRequest = new StreamReader(rq.Body);
+            String strReqStream = srRequest.ReadToEnd();
+            BaseModel baseModel = JsonHandler.DeserializeJsonToObject<BaseModel>(strReqStream);
+
+            var allUsers = _userManager.Users.ToList();
+            var pageUsers = _userManager.Users
+                .Skip(baseModel.offset).Take(baseModel.limit).ToList();
+            PageResult<ApplicationUser> pageResult = new PageResult<ApplicationUser>(allUsers.Count, pageUsers);
+            return Json(pageResult);
+
+        }
+
+        public async Task<ActionResult> GetRolesByUserName(string UserName)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+            var roles = await _userManager.GetRolesAsync(user);
+            return Json(roles);
+        }
+        
+        //
+        // POST: /Account/Register
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(CreateUserViewModel model)
+        {
+            Message message = new Message();
+            message.Success = true;
+
+            if (!ModelState.IsValid)
+            {
+                message.Success = false;
+                message.Content = ModelStateError();
+                return Json(message);
+            }
+
+            //用户的角色
+            string[] roles = model.Roles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            //判断这些角色是否属于角色表
+            foreach (string role in roles)
+            {
+                bool isRoleExisted = await _roleManager.RoleExistsAsync(role);
+                if (!isRoleExisted)
+                {
+                    message.Success = false;
+                    message.Content = "Role：" + role + "is not exist in system!";
+                    return Json(message);
+
+                }
+            }
+
+            //新增用户
+            var user = new ApplicationUser { UserName = model.UserName };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                message.Success = false;
+                message.Content = result.Errors.First().Description;
+                return Json(message);
+
+            }
+            //把用户添加到角色
+            var curruser = await _userManager.FindByNameAsync(model.UserName);
+            result = await _userManager.AddToRolesAsync(curruser, roles);
+
+
+            return Json(message);
+        }
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        public async Task<IActionResult> BachDeleteByUserId(string UserIds)
+        {
+            Message message = new Message();
+            message.Success = true;
+
+            List<string> userIds = JsonHandler.DeserializeJsonToList<string>(UserIds);
+            foreach (string userid in userIds)
+            {
+                var user = await _userManager.FindByIdAsync(userid);
+                var result = await _userManager.DeleteAsync(user);
+
+            }
+
+            return Json(message);
         }
         #endregion
     }
