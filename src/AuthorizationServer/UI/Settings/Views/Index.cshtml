@@ -14,19 +14,16 @@
 <div class="row">
     <div class="col-md-3">
         <ul class="nav nav-tabs" id="myTab">
-            <li class="active"><a id="UserManage" href="#divUserManage">Users</a></li>
-            <li><a id="RoleManage" href="#divRoleManage">Roles</a></li>
-            <li><a id="ClientManage" href="#divClientManage">Clients</a></li>
-            <li><a id="ScopeManage" href="#divScopeManage">Scopes</a></li>
+            <li class="active"><a id="UserManage" href="#divContent">Users</a></li>
+            <li><a id="RoleManage" href="#divContent">Roles</a></li>
+            <li><a id="ClientManage" href="#divContent">Clients</a></li>
+            <li><a id="ScopeManage" href="#divContent">Scopes</a></li>
             
         </ul>
     </div>
     <div class="col-md-9">
         <div class="tab-content">
-            <div class="tab-pane active" id="divUserManage"> </div>
-            <div class="tab-pane" id="divRoleManage"></div>
-            <div class="tab-pane" id="divClientManage"></div>
-            <div class="tab-pane" id="divScopeManage"></div>
+            <div class="tab-pane active" id="divContent"> </div>
             
         </div>
 
@@ -37,7 +34,7 @@
 
     $(document).ready(function () {
          
-        LoadTab("divUserManage", "/Settings/UserManage");
+        LoadTab("/Settings/UserManage");
         $('#myTab a:first').tab('show');//初始化显示哪个tab
        
         $('#myTab a').click(function (e) {
@@ -47,18 +44,17 @@
             //加载链接内容
             var aId = this.id;
             var tabUrl = "/Settings/" + aId;
-            var tabId = "div"+aId;
-            LoadTab(tabId,tabUrl);
+            LoadTab(tabUrl);
 
            
         })
         
     });
 
-    function LoadTab(id,url) {
+    function LoadTab(url) {
         //加载两次，否则右上角的下拉会无效？
-        $("#" + id).load(url);
-        $("#" + id).load(url);
+        //$("#divContent").load(url);
+        $("#divContent").load(url);
     }
 
 </script>

@@ -21,7 +21,7 @@
 
 </div>
 
-<div class="modal fade" id="UserAddModel" tabindex="-1" role="dialog"
+<div class="modal fade" id="UserAddModel" tabindex="-1" user="dialog"
      aria-labelledby="userModalLabel" aria-hidden="false">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -75,7 +75,7 @@
             </div>
             <div class="modal-footer">
                 <button data-dismiss="modal" class="btn">取消</button>
-                <button data-dismiss="modal" class="btn btn-primary" id="btnAdd">保存</button>
+                <button  class="btn btn-primary" id="btnAdd">保存</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal -->
@@ -110,7 +110,7 @@
 
     function InitTable()
     {
-        $('#roleTable').bootstrapTable({
+        $('#userTable').bootstrapTable({
             height:500,
             method: 'post',                 //The method type to request remote data.
             url: '/Settings/GetUserPageData',
@@ -226,7 +226,7 @@
 
         $("#btnUserDelete").click(function () {
 
-            var selections = $('#roleTable').bootstrapTable('getSelections');
+            var selections = $('#userTable').bootstrapTable('getSelections');
             if(selections.length == 0)
             {
                 layer.alert("Please select records", {
@@ -297,13 +297,15 @@
     }
     //clost model
     function CloseAddModel() {
-
+        $("#UserAddModel").removeClass("in");
+        $(".modal-backdrop").remove();
         jQuery('#UserAddModel').modal('hide');
+
     }
 
     function Search() {
         //重新加载
-        $('#roleTable').bootstrapTable('refresh');
+        $('#userTable').bootstrapTable('refresh');
     }
 
 </script>   
