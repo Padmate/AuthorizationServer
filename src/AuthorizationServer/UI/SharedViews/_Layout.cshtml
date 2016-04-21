@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CloudServer</title>
+    <title>DpControl-Developer</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
@@ -28,35 +28,35 @@
                 <a href="~/">
                     <span class="navbar-brand">
                         <img src="~/icon.png" class="icon-banner">
-                        CloudServer
+                        DpControl Developer
                     </span>
                 </a>
             </div>
+            <form asp-controller="Logout" asp-action="LogOff" method="post" id="logoutForm">
+                <ul class="nav navbar-nav navbar-right" show-if="User.Identity.IsAuthenticated">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">@User.Identity.Name <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/Settings/Index">Configration</a></li>
+                            <li class="divider"></li>
+                            <li><a href="javascript:document.getElementById('logoutForm').submit()">Logout</a></li>
 
-            <ul class="nav navbar-nav navbar-right" show-if="User.Identity.IsAuthenticated">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">@User.Identity.Name <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/Settings/Index">Configration</a></li>
-                        <li class="divider"></li>
-                        <li><a asp-route="Logout">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
+                        </ul>
+                    </li>
+                </ul>
+            </form>
+
             <ul class="nav navbar-nav navbar-right" show-if="!User.Identity.IsAuthenticated">
                 <li><a asp-route="Login">Sign In</a></li>
-                    
+
             </ul>
-        </div>
+</div>
     </div>
     
     <div class="container body-content">
         @RenderBody()
 
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.ToString("yyyy/MM/dd") - Padmate</p>
-        </footer>
+        
     </div>
     
    

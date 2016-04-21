@@ -14,125 +14,19 @@
 <div class="row">
     <div class="col-md-3">
         <ul class="nav nav-tabs" id="myTab">
-            <li class="active"><a id="aproject" href="#projects">Projects</a></li>
-            <li><a id="aclient" href="#clients">Clients</a></li>
+            <li class="active"><a id="aclient" href="#clients">Clients</a></li>
             <li><a id="ascope" href="#scopes">Scopes</a></li>
+            <li><a id="arole" href="#roles">Roles</a></li>
+            <li><a id="auser" href="#users">Users</a></li>
+
         </ul>
     </div>
     <div class="col-md-9">
         <div class="tab-content">
-            <div class="tab-pane active" id="projects">
-                <h2>请确保有已经初始化Scopes后再新增Clients</h2>
-            </div>
-            <div class="tab-pane" id="clients">
-                <div class="col-md-8">
-                    <!--Form-->
-                    <form asp-controller="Settings" asp-action="CreateClient" class="form-horizontal" role="form" name="clientForm">
-                        
-                        <div class="form-group hidden">
-                            <label class="col-sm-3 control-label">Id：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="Id" id="lbId">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tbClientId" class="col-sm-3 control-label">ClientID：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientId" id="tbClientId" required
-                                       oninvalid="setCustomValidity('ClientId is required')" oninput="setCustomValidity('')">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tbClientName" class="col-sm-3 control-label">ClientName：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientName" required id="tbClientName">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tbClientUri" class="col-sm-3 control-label">ClientUri：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientUri" id="tbClientUri">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tbClientSecret" class="col-sm-3 control-label">ClientSecret：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" asp-for="ClientSecret" id="tbClientSecret">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="taScopes" class="col-sm-3 control-label">AllowScopes：</label>
-                            <div class="col-sm-9">
-                                <textarea class="form-control" rows="3" id="taScopes" asp-for="AllowScope"></textarea>
-                            </div>
-
-                        </div>
-                        <div class="form-group">
-                            <label for="selFlow" class="col-sm-3 control-label">Flows：</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" asp-for="Flow" id="selFlow" required>
-                                    <option value="@System.Convert.ToInt32(Flows.AuthorizationCode)">@Flows.AuthorizationCode</option>
-                                    <option value="@System.Convert.ToInt32(Flows.Implicit)">@Flows.Implicit</option>
-                                    <option value="@System.Convert.ToInt32(Flows.ResourceOwner)">@Flows.ResourceOwner</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="taRedirectUri" class="col-sm-3 control-label">RedirectUris：</label>
-                            <div class="col-sm-9">
-                                <textarea class="form-control" rows="3" asp-for="RedirectUri" id="taRedirectUris"></textarea>
-                            </div>
-
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-9">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" asp-for="RequireConsents" id="ckRequireConsents"> Require Consents
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-9">
-                                <button type="submit" class="btn btn-warning" id="btnClientSave">保存</button>
-                                <button type="submit" class="btn btn-primary" id="btnClientEdit">修改</button>
-                                <button type="button" class="btn btn-danger" id="btnClientDelete">删除</button>
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-4">
-                    <div id="toolbar"></div>
-                    <table id="clientTable"></table>
-                </div>
-            </div>
-            <div class="tab-pane" id="scopes">
-                
-                <div class="col-md-4">
-                    @if (_scopeContext.Scopes.Count() > 0)
-                    {
-
-                        <a class="btn btn-success disabled" href="/Settings/CreateScopes">AddScopes &raquo;</a>
-                        <br />
-                        <br />
-                        <a class="btn btn-danger" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
-                    }
-                    else
-                    {
-                        <a class="btn btn-success" href="/Settings/CreateScopes">AddScopes &raquo;</a>
-                        <br />
-                        <br />
-                        <a class="btn btn-danger disabled" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
-                    }
-                    
-                </div>
-                <div class="col-md-8">
-                    <table id="scopeTable"></table>
-                </div>
-            </div>
+            <div class="tab-pane active" id="clients"></div>
+            <div class="tab-pane" id="scopes"></div>
+            <div class="tab-pane" id="roles"></div>
+            <div class="tab-pane" id="users"> </div>
         </div>
 
     </div>
@@ -140,254 +34,41 @@
 
 <script>
 
-    var listType = '@ViewData["ListType"]';
-    var operateType = '@ViewData["operateType"]';
 
     $(document).ready(function () {
-        if (listType == "") {
-            $('#myTab a:first').tab('show');//初始化显示哪个tab
-
-
-        }else {
-
-            $('#a' + listType).tab('show');//显示哪个tab
-            if (operateType == "create") {
-
-            } else if (operateType == "edit") {
-
-            } else if (operateType == "delete") {
-
-            }
-        }
-
+         
+        var tabUrl = "/Settings/ClientManage";
+        $("#clients").load(tabUrl);
+         $('#myTab a:first').tab('show');//初始化显示哪个tab
+       
         $('#myTab a').click(function (e) {
+            
             e.preventDefault();//阻止a链接的跳转行为
             $(this).tab('show');//显示当前选中的链接及关联的content
-            SetClientDetail(null);
-            ChangeClientButtons("add");
+            //加载链接内容
+            var aId = this.id;
+            if (aId == "aclient")
+            {
+                var tabUrl = "/Settings/ClientManage";
+                $("#clients").load(tabUrl);
+            } else if (aId == "ascope")
+            {
+                var tabUrl = "/Settings/ScopeManage";
+                $("#scopes").load(tabUrl);
+            } else if (aId == "arole")
+            {
+                var tabUrl = "/Settings/RoleManage";
+                $("#roles").load(tabUrl);
+
+            } else if (aId == "auser") {
+                var tabUrl = "/Settings/UserManage";
+                $("#users").load(tabUrl);
+            }
+
+           
         })
         
-        $("#btnClientEdit").click(function (e) {
-
-            var id = $("#lbId").val(); 
-            clientForm.action = "/Settings/EditClient";
-            clientForm.submit();
-
-        });
-
-        $("#btnClientDelete").click(function (e) {
-            
-            var id = $("#lbId").val();
-            clientForm.action = "/Settings/DeleteClient/?id=" + id;
-            clientForm.submit();
-
-        });
-
-        InitClientTable();
-        InitScopeTable();
-        ChangeClientButtons("add");
     });
 
     
-
-    function InitClientTable() {
-        $('#clientTable').bootstrapTable({
-            height: 500,
-            method: 'post',                 //The method type to request remote data.
-            url: '/Settings/GetClientsPageData',
-            dataType: "json",               //The type of data that you are expecting back from the server.
-            contentType: 'application/json',
-            pagination: true,               //True to show a pagination toolbar on table bottom.
-            pageSize: 10,                   //初始化每页显示几条
-            pageNumber: 1,                   //初始化在第几页
-            pageList: [10, 25, 50, 100, 200, 'All'],
-            sidePagination: "server",       //服务端请求
-            idField: 'Id',
-            toolbar: '#toolbar',
-            showRefresh: true,
-            search: true,
-            queryParams: ConstructClientQueryParams,
-            //queryParamsType: "limit",
-            locale: 'en-US',
-            singleSelect:true,
-            columns: [
-            {
-                field: 'Id',
-                title: 'Id',
-                visible: false,
-            },
-            {
-                field: 'ClientId',
-                title: 'ClientId',
-                sortable: true
-
-            }
-            ],
-            onClickRow: function (row,element) {
-                var clientDetail = GetClientDetail(row.Id);
-                SetClientDetail(clientDetail);
-                ChangeClientButtons("show");
-
-            }
-
-        });
-
-    }
-
-    function ConstructClientQueryParams(param) {
-        var params = {
-            limit: param.limit, //页面大小
-            offset: param.offset,//偏移数量
-            page: param.offset / param.limit, //页码
-        };
-        return params;
-    }
-
-    function GetClientDetail(id)
-    {
-        var result = null;
-        $.ajax({
-            type: "post",//使用post方法访问后台
-            dataType: "json",//返回json格式的数据
-            url: "/Settings/GetClientAllDetail",
-            data: { "id": id },
-            async: false,
-            success: function (data) {
-                result = data;
-            }
-        });
-        return result;
-
-    }
-
-    function SetClientDetail(client) {
-
-        if (client != null) {
-            $("#lbId").val(client.Id);
-            $("#tbClientId").val(client.ClientId);
-            $("#tbClientName").val(client.ClientName);
-            $("#tbClientUri").val(client.ClientUri);
-            $("#tbClientSecret").val(client.ClientSecret);
-            ConstructTextAreaClientScopeValue(client.AllowedScopes);
-            $("#selFlow").val(client.Flow);
-            ConstructTextAreaClientRedirectUriValue(client.RedirectUris);
-            $("#ckRequireConsents").attr("checked",client.RequireConsent);
-        } else {
-            $("#lbId").val("");
-            $("#tbClientId").val("");
-            $("#tbClientName").val("");
-            $("#tbClientUri").val("");
-            $("#tbClientSecret").val("");
-            ConstructTextAreaClientScopeValue(null);
-            $("#selFlow").val("");
-            ConstructTextAreaClientRedirectUriValue(null);
-            $("#ckRequireConsents").attr("checked", false);
-
-        }
-    }
-
-    function ConstructTextAreaClientScopeValue(arrScopes) {
-        var textareaValue = "";
-        if(arrScopes !=null)
-        {
-            for (var i = 0; i < arrScopes.length;i++)
-            {
-                textareaValue +=arrScopes[i]+"\r\n"
-            }
-
-        }
-        $("#taScopes").val(textareaValue);
-
-    }
-
-    function ConstructTextAreaClientRedirectUriValue(arrRedirectUris) {
-        var textareaValue = "";
-        if (arrRedirectUris != null) {
-            for (var i = 0; i < arrRedirectUris.length; i++) {
-                textareaValue += arrRedirectUris[i] + "\r\n"
-            }
-        }
-        $("#taRedirectUris").val(textareaValue);
-
-    }
-
-    function ChangeClientButtons(eventType) {
-        if(eventType =="add")
-        {
-            $("#btnClientSave").show();
-            $("#btnClientEdit").hide();
-            $("#btnClientDelete").hide();
-
-        }else
-        {
-            $("#btnClientSave").hide();
-            $("#btnClientEdit").show();
-            $("#btnClientDelete").show();
-        }
-    }
-
-    function InitScopeTable() {
-        $('#scopeTable').bootstrapTable({
-            height: 500,
-            method: 'post',                 //The method type to request remote data.
-            url: '/Settings/GetScopesPageData',
-            dataType: "json",               //The type of data that you are expecting back from the server.
-            contentType: 'application/json',
-            pagination: true,               //True to show a pagination toolbar on table bottom.
-            pageSize: 10,                   //初始化每页显示几条
-            pageNumber: 1,                   //初始化在第几页
-            pageList: [10, 25, 50, 100, 200, 'All'],
-            sidePagination: "server",       //服务端请求
-            idField: 'Id',
-            //toolbar: '#toolbar',
-            showRefresh: true,
-            search: true,
-            queryParams: ConstructScopetQueryParams,
-            //queryParamsType: "limit",
-            locale: 'en-US',
-            singleSelect: true,
-            columns: [
-            {
-                field: 'Id',
-                title: 'Id',
-                visible: false,
-            },
-            {
-                field: 'Name',
-                title: 'Name',
-                sortable: true
-
-            },
-            {
-                field: 'DisplayName',
-                title: 'DisplayName',
-                sortable: true
-
-            },
-            {
-                field: 'Type',
-                title: 'Type',
-                sortable: true
-
-            },
-            {
-                field: 'Description',
-                title: 'Description',
-                sortable: true
-
-            }
-            ]
-
-        });
-
-    }
-
-    function ConstructScopetQueryParams(param) {
-        var params = {
-            limit: param.limit, //页面大小
-            offset: param.offset,//偏移数量
-            page: param.offset / param.limit, //页码
-        };
-        return params;
-    }
 </script>

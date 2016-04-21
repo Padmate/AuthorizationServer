@@ -1,0 +1,101 @@
+﻿@using AuthorizationServer.Models;
+@inject  ScopeConfigurationContext _scopeContext
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="col-md-4">
+            @if (_scopeContext.Scopes.Count() > 0)
+            {
+
+                <a class="btn btn-success disabled" href="/Settings/CreateScopes">AddScopes &raquo;</a>
+                        <br />
+                        <br />
+                        <a class="btn btn-danger" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
+            }
+            else
+            {
+                <a class="btn btn-success" href="/Settings/CreateScopes">AddScopes &raquo;</a>
+                        <br />
+                        <br />
+                        <a class="btn btn-danger disabled" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
+            }
+
+        </div>
+        <div class="col-md-8">
+            <table id="scopeTable"></table>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        
+        InitScopeTable();
+    });
+
+    function InitScopeTable() {
+        $('#scopeTable').bootstrapTable({
+            height: 500,
+            method: 'post',                 //The method type to request remote data.
+            url: '/Settings/GetScopesPageData',
+            dataType: "json",               //The type of data that you are expecting back from the server.
+            contentType: 'application/json',
+            pagination: true,               //True to show a pagination toolbar on table bottom.
+            pageSize: 10,                   //初始化每页显示几条
+            pageNumber: 1,                   //初始化在第几页
+            pageList: [10, 25, 50, 100, 200, 'All'],
+            sidePagination: "server",       //服务端请求
+            idField: 'Id',
+            //toolbar: '#toolbar',
+            showRefresh: true,
+            search: true,
+            queryParams: ConstructScopetQueryParams,
+            //queryParamsType: "limit",
+            locale: 'en-US',
+            singleSelect: true,
+            columns: [
+            {
+                field: 'Id',
+                title: 'Id',
+                visible: false,
+            },
+            {
+                field: 'Name',
+                title: 'Name',
+                sortable: true
+
+            },
+            {
+                field: 'DisplayName',
+                title: 'DisplayName',
+                sortable: true
+
+            },
+            {
+                field: 'Type',
+                title: 'Type',
+                sortable: true
+
+            },
+            {
+                field: 'Description',
+                title: 'Description',
+                sortable: true
+
+            }
+            ]
+
+        });
+
+    }
+
+    function ConstructScopetQueryParams(param) {
+        var params = {
+            limit: param.limit, //页面大小
+            offset: param.offset,//偏移数量
+            page: param.offset / param.limit, //页码
+        };
+        return params;
+    }
+</script>

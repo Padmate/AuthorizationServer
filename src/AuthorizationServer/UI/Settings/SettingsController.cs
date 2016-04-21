@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using TwentyTwenty.IdentityServer4.EntityFramework7.Entities;
 using Microsoft.Data.Entity;
 using AuthorizationServer.Configuration;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace AuthorizationServer.UI.Settings
 {
@@ -19,23 +21,37 @@ namespace AuthorizationServer.UI.Settings
         private ScopeConfigurationContext _scopeContext;
         private ClientConfigurationContext _clientContext;
         private OperationalContext _operationalContext;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public SettingsController(ClientConfigurationContext clientContext,
-            ScopeConfigurationContext scopeContext, OperationalContext operationalContext)
+            ScopeConfigurationContext scopeContext,
+            OperationalContext operationalContext,
+            UserManager<ApplicationUser> userManager,
+           SignInManager<ApplicationUser> signInManager,
+           RoleManager<IdentityRole> roleManager)
         {
             _clientContext = clientContext;
             _scopeContext = scopeContext;
             _operationalContext = operationalContext;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
 
         public ActionResult Index()
         {
-            ViewData["ListType"] = "";
             return View();
         }
 
         #region Clients
+        public ActionResult ClientManage()
+        {
+            return View();
+        }
+
         [HttpPost]
         public ActionResult CreateClient(ClientViewModel model)
         {
@@ -75,9 +91,7 @@ namespace AuthorizationServer.UI.Settings
             {
                 ModelState.AddModelError(string.Empty, "新增失败："+e.Message);
             }
-
-            ViewData["ListType"] = "client";
-            ViewData["operateType"] = "create";
+            
 
             return View("Index",model);
         }
@@ -209,7 +223,6 @@ namespace AuthorizationServer.UI.Settings
         [HttpPost]
         public ActionResult EditClient(ClientViewModel model)
         {
-            ViewData["ListType"] = "client";
             return View("Index");
         }
 
@@ -219,8 +232,7 @@ namespace AuthorizationServer.UI.Settings
             var client = _clientContext.Clients.FirstOrDefault(c=>c.Id == new Guid(id));
             _clientContext.Remove(client);
             _clientContext.SaveChanges();
-
-            ViewData["ListType"] = "client";
+            
             return View("Index");
 
         }
@@ -266,11 +278,14 @@ namespace AuthorizationServer.UI.Settings
         #endregion
 
         #region Scopes
+        public ActionResult ScopeManage()
+        {
+            return View();
+        }
+
         public ActionResult CreateScopes()
         {
             AddScopes();
-            ViewData["ListType"] = "scope";
-            ViewData["operateType"] = "create";
 
             return View("Index");
         }
@@ -339,9 +354,7 @@ namespace AuthorizationServer.UI.Settings
         {
             _scopeContext.RemoveRange(_scopeContext.Scopes);
             _scopeContext.SaveChanges();
-
-            ViewData["ListType"] = "scope";
-            ViewData["operateType"] = "create";
+            
 
             return View("Index");
         }
@@ -359,6 +372,95 @@ namespace AuthorizationServer.UI.Settings
                 .Skip(baseModel.offset).Take(baseModel.limit).ToList();
             PageResult<Scope<Guid>> pageResult = new PageResult<Scope<Guid>>(allScopes.Count, pageScopes);
             return Json(pageResult);
+        }
+        #endregion
+
+        #region Role
+
+        [HttpGet]
+        public ActionResult RoleManage()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Get Role Paging Data
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult GetRolePageData()
+        {
+            //get params
+            HttpRequest rq = Request;
+            StreamReader srRequest = new StreamReader(rq.Body);
+            String strReqStream = srRequest.ReadToEnd();
+            BaseModel baseModel = JsonHandler.DeserializeJsonToObject<BaseModel>(strReqStream);
+
+            var allRoles = _roleManager.Roles.ToList();
+            var pageRoles = _roleManager.Roles
+                .Skip(baseModel.offset).Take(baseModel.limit).ToList();
+            PageResult<IdentityRole> pageResult = new PageResult<IdentityRole>(allRoles.Count, pageRoles);
+            return Json(pageResult);
+            
+        }
+
+        // GET: /Account/Register
+        [HttpGet]
+        public IActionResult CreateRole()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/Register
+        [HttpPost]
+        public async Task<IActionResult> CreateRole(string RoleName)
+        {
+
+            Message message = new Message();
+            message.Success = true;
+            if (string.IsNullOrEmpty(RoleName))
+            {
+                message.Success = false;
+                message.Content = "Role Name is required";
+                return Json(message);
+            }
+
+            //新增角色
+            IdentityRole adminRole = new IdentityRole { Name = RoleName, NormalizedName = RoleName.ToUpper() };
+            var result = await _roleManager.CreateAsync(adminRole);
+            if (!result.Succeeded)
+            {
+                message.Success = false;
+                message.Content = result.Errors.First().Description;
+                return Json(message);
+
+            }
+            return Json(message);
+
+        }
+
+        public async Task<IActionResult> BachDeleteByRoleId(string RoleIds)
+        {
+            Message message = new Message();
+            message.Success = true;
+
+            List<string> roleIds = JsonHandler.UnJson<List<string>>(RoleIds);
+            foreach (string roleid in roleIds)
+            {
+                var role = await _roleManager.FindByIdAsync(roleid);
+                var result = await _roleManager.DeleteAsync(role);
+
+            }
+
+            return Json(message);
+        }
+
+        #endregion
+
+        #region User
+        public ActionResult UserManage()
+        {
+            return View();
         }
         #endregion
     }

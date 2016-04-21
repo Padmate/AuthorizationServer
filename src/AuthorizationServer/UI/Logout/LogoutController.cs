@@ -1,4 +1,5 @@
-﻿using IdentityServer4.Core;
+﻿using AuthorizationServer.UI.Home;
+using IdentityServer4.Core;
 using IdentityServer4.Core.Services;
 using Microsoft.AspNet.Mvc;
 using System.Linq;
@@ -32,7 +33,19 @@ namespace AuthorizationServer.UI.Logout
             HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
 
             var vm = new LoggedOutViewModel();
-            return View("LoggedOut", vm);
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogOff(string signOutId)
+        {
+            await HttpContext.Authentication.SignOutAsync(Constants.PrimaryAuthenticationType);
+
+            // set this so UI rendering sees an anonymous user
+            HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+
+            var vm = new LoggedOutViewModel();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
     }
 }
