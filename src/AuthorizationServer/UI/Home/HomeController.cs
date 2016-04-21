@@ -1,5 +1,7 @@
 ﻿using AuthorizationServer.Configuration;
 using AuthorizationServer.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Data.Entity;
 using System;
@@ -15,20 +17,62 @@ namespace AuthorizationServer.UI.Home
         private ScopeConfigurationContext _scopeContext;
         private ClientConfigurationContext _clientContext;
         private OperationalContext _operationalContext;
-
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        
         public HomeController(ClientConfigurationContext clientContext, 
-            ScopeConfigurationContext scopeContext, OperationalContext operationalContext)
+            ScopeConfigurationContext scopeContext, 
+            OperationalContext operationalContext,
+            UserManager<ApplicationUser> userManager,
+           RoleManager<IdentityRole> roleManager)
         {
             _clientContext = clientContext;
             _scopeContext = scopeContext;
             _operationalContext = operationalContext;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
         
 
         [Route("/")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            await InitAdmin();
             return View();
+        }
+
+        public async Task<Message> InitAdmin( )
+        {
+            Message message = new Message();
+            message.Success = true;
+            message.Content = "InitAdmin Successful";
+
+            string userName = "Admin";
+            string password = "admin123";
+            string roleName = "Admin";
+
+           
+            //判断系统中是否已经存在Admin用户
+            var admin = _userManager.FindByNameAsync(userName);
+
+            if (admin.Result != null)
+            {
+                message.Success = false;
+                message.Content = "Admin already exist in System!";
+                return message;
+            }
+            //新增用户
+            var user = new ApplicationUser { UserName = userName };
+            var result = await _userManager.CreateAsync(user, password);
+            //新增角色
+            IdentityRole adminRole = new IdentityRole { Name = roleName, NormalizedName = roleName.ToUpper() };
+            result = await _roleManager.CreateAsync(adminRole);
+            //把用户添加到角色
+            var curruser = await _userManager.FindByNameAsync(userName);
+            result = await _userManager.AddToRoleAsync(curruser, roleName);
+            
+
+            return message;
         }
 
         public IActionResult AboutIdsv()
