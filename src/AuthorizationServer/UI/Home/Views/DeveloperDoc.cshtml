@@ -1,3 +1,173 @@
-﻿<div class="row">
-    <h1>Developers Documents</h1>
-</div>
+﻿<style>
+
+    .areaStyle{
+        min-height:800px;
+        padding:100px 50px;
+    }
+</style>
+
+<nav class="navbar navbar-default navbar-fixed-top" style="top:50px;z-index:99">
+    <div class="container">
+        <ul class="nav nav-tabs navbar-right">
+            <li><a href="#client"><strong>Client</strong></a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <strong>Flow</strong>
+                        <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#resourceowner"><strong> ResourceOwner Flow</strong></a></li>
+                    <li><a href="#implicit"><strong> Implicit Flow</strong></a></li>
+                    <li><a href="#code"><strong> Authorization Code Flow</strong></a></li>
+                    <li><a href="#credentials"><strong> ClientCredentials Flow</strong></a></li>
+                </ul>
+            </li>
+            <li><a href="#more"><strong>More</strong></a></li>
+        </ul>
+    </div>
+</nav>
+
+<div>
+    <a name="client"></a>
+    <div class="areaStyle">
+        <a name="resourceowner_client"></a>
+        <div>
+            <h2>Register you client</h2>
+            <p><strong>AuthorizationServer_EndPoint:</strong>http://developer.chinacloudsites.cn/</p>
+            <h3>Register ResourceOwner Flow Client</h3>
+            <p><img src="~/Images/document/resourceowner_client.png" style="height:400px;width:100%" /></p>
+
+        </div>
+    </div>
+    <a  name="resourceowner"></a>
+    <div class="areaStyle">
+        <h2>ResourceOwner Flow - Fiddle</h2>
+        <h3>Get Token</h3>
+        <p>
+            <strong>Token_EndPoint:</strong> developer.chinacloudsites.cn/connect/token.
+        </p>
+<pre><code>HttpMethod:POST
+Head
+User-Agent: Fiddler
+Content-Type: application/x-www-form-urlencoded
+</code></pre>
+        <p>The body params reference <a href="#more_resourceowner">here</a></p>
+<pre><code>Body
+grant_type=password&amp;username=username&amp;password=password&amp;
+scope=scope&amp;client_id=clientid&amp;
+client_secret=clientsecret
+</code></pre>
+        <p>After request as above,you will get the response:</p>
+<pre><code>Response
+HTTP/1.1 200 OK
+Cache-Control: no-store, no-cache, max-age=0
+Pragma: no-cache
+Content-Type: application/json
+Server: Kestrel
+X-SourceFiles: =?UTF-8?B?RDpcVlNXb3JrU3BhY2UyMDE1XFBhZG1hdGVcQXV0aG9yaXphdGlvblNlcnZlclxzcmNcQXV0aG9yaXphdGlvblNlcnZlclx3d3dyb290XGNvbm5lY3RcdG9rZW4=?=
+X-Powered-By: ASP.NET
+Date: Fri, 15 Apr 2016 03:37:10 GMT
+Content-Length: 953
+{&quot;access_token&quot;:&quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjIxMzk0IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDoyMTM5NC9yZXNvdXJjZXMiLCJleHAiOjE0NjA2OTUwMzEsIm5iZiI6MTQ2MDY5MTQzMSwiY2xpZW50X2lkIjoicGFkbWF0ZV9yZXNvdXJjZW93bmVyIiwic2NvcGUiOiJkcGNvbnRyb2xhcGlzY29wZSIsInN1YiI6IjVkOGRiMmI0LWJkOTctNDdkMS1iYTk3LWQ5YWUzNTRjYTg4YSIsImF1dGhfdGltZSI6MTQ2MDY5MTQzMCwiaWRwIjoiaWRzcnYiLCJuYW1lIjoiQWRtaW4iLCJlbWFpbCI6IiIsInJvbGUiOiJBZG1pbiIsImFtciI6WyJwYXNzd29yZCJdfQ.pLyScaDifk4pjDOFq-oQ4aqwoLx1GEWKNaQAEzOxQEXa53Pcgj3rJk_zNQQ1AX4l1ia4VcWsOuVmrrsUN_rMcx019kUZ7KXW1HykJ2dodTx6ARdQU77ETkhi5rUq7ZBtRTFEHNbl8jksC2eTdFB_OoSaGo-44ATaUn0SxjRJSjvdS83mT6OlRkMvbGCYQYY4CeuiCoAiv7TSMlLJ893AcEDbBYqaZ9uBBY_o7jfkdj7iwT81g8N7H3kKAvAozhBeOf8KeKiz33-vcGiUPD32ntu4E7WPi5f_e4zRQ2ulXW-49XoUPUVKzzJQS3InMr1E5slJyZVMAqUdZSky-9jNlw&quot;,&quot;expires_in&quot;:3600,&quot;token_type&quot;:&quot;Bearer&quot;}
+</code></pre>
+        <h3>Call Api with access_token</h3>
+        <p><strong>Api_EndPoint:</strong> http://dpcontrolapi.chinacloudsites.cn/v1/Customers.</p>
+<pre><code>HttpMethod:GET
+Head
+User-Agent: Fiddler
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjIxMzk0IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDoyMTM5NC9yZXNvdXJjZXMiLCJleHAiOjE0NjA2OTUwMzEsIm5iZiI6MTQ2MDY5MTQzMSwiY2xpZW50X2lkIjoicGFkbWF0ZV9yZXNvdXJjZW93bmVyIiwic2NvcGUiOiJkcGNvbnRyb2xhcGlzY29wZSIsInN1YiI6IjVkOGRiMmI0LWJkOTctNDdkMS1iYTk3LWQ5YWUzNTRjYTg4YSIsImF1dGhfdGltZSI6MTQ2MDY5MTQzMCwiaWRwIjoiaWRzcnYiLCJuYW1lIjoiQWRtaW4iLCJlbWFpbCI6IiIsInJvbGUiOiJBZG1pbiIsImFtciI6WyJwYXNzd29yZCJdfQ.pLyScaDifk4pjDOFq-oQ4aqwoLx1GEWKNaQAEzOxQEXa53Pcgj3rJk_zNQQ1AX4l1ia4VcWsOuVmrrsUN_rMcx019kUZ7KXW1HykJ2dodTx6ARdQU77ETkhi5rUq7ZBtRTFEHNbl8jksC2eTdFB_OoSaGo-44ATaUn0SxjRJSjvdS83mT6OlRkMvbGCYQYY4CeuiCoAiv7TSMlLJ893AcEDbBYqaZ9uBBY_o7jfkdj7iwT81g8N7H3kKAvAozhBeOf8KeKiz33-vcGiUPD32ntu4E7WPi5f_e4zRQ2ulXW-49XoUPUVKzzJQS3InMr1E5slJyZVMAqUdZSky-9jNlw
+</code></pre>
+        <p>If access_token not out of date,you will get response like:</p>
+<pre><code>HTTP/1.1 200 OK
+Content-Length: 942
+Content-Type: application/json; charset=utf-8
+Server: Microsoft-IIS/8.0
+X-Powered-By: ASP.NET
+Set-Cookie: ARRAffinity=e35e33990dcb4e265fe9d589e51183357d586de599c4bd4f8599653901bb3d40;Path=/;Domain=dpcontrolapi.chinacloudsites.cn
+Date: Fri, 22 Apr 2016 02:26:42 GMT
+{
+  &quot;data&quot;: [
+{
+  &quot;CustomerId&quot;: 5,
+  &quot;Creator&quot;: &quot;Test&quot;,
+  &quot;CreateDate&quot;: &quot;2016-03-20T02:46:04.6714928&quot;,
+  &quot;Modifier&quot;: null,
+  &quot;ModifiedDate&quot;: null,
+  &quot;CustomerName&quot;: &quot;string&quot;,
+  &quot;CustomerNo&quot;: &quot;string&quot;
+},
+{
+  &quot;CustomerId&quot;: 10,
+  &quot;Creator&quot;: &quot;Test&quot;,
+  &quot;CreateDate&quot;: &quot;2016-03-23T06:59:11.1249862&quot;,
+  &quot;Modifier&quot;: null,
+  &quot;ModifiedDate&quot;: null,
+  &quot;CustomerName&quot;: &quot;lee&quot;,
+  &quot;CustomerNo&quot;: &quot;3&quot;
+},
+{
+  &quot;CustomerId&quot;: 11,
+  &quot;Creator&quot;: &quot;Test&quot;,
+  &quot;CreateDate&quot;: &quot;2016-03-23T07:01:04.131246&quot;,
+  &quot;Modifier&quot;: null,
+  &quot;ModifiedDate&quot;: null,
+  &quot;CustomerName&quot;: &quot;til&quot;,
+  &quot;CustomerNo&quot;: &quot;4&quot;
+},
+{
+  &quot;CustomerId&quot;: 12,
+  &quot;Creator&quot;: &quot;Test&quot;,
+  &quot;CreateDate&quot;: &quot;2016-03-26T03:59:10.0464407&quot;,
+  &quot;Modifier&quot;: null,
+  &quot;ModifiedDate&quot;: null,
+  &quot;CustomerName&quot;: &quot;project2&quot;,
+  &quot;CustomerNo&quot;: &quot;002&quot;
+}
+  ]
+}
+</code></pre>
+
+    </div>
+
+    <a  name="implicit"></a>
+    <div class="areaStyle">
+        <h2>We are working on this topic</h2>
+    </div>
+
+    <a name="code"></a>
+    <div class="areaStyle">
+        <h2>We are working on this topic</h2>
+
+    </div>
+
+    <a name="credentials"></a>
+    <div class="areaStyle">
+        <h2>We are working on this topic</h2>
+
+    </div>
+
+    <a name="more"></a>
+    <div class="areaStyle">
+        <a name="more_resourceowner"></a>
+        <div>
+            <h2>More Information</h2>
+            <h4>ResourceOwner Params:</h4>
+            <ul>
+                <li><strong>username：</strong> you account name</li>
+                <li><strong>password：</strong> you password</li>
+                <li><strong>grant_type：</strong> fixed value 'password'</li>
+                <li><strong>scope：</strong> the api scope which you are going to access,<a href="#resourceowner_client">reference</a></li>
+                <li><strong>client_id：</strong> you application id which has been register in Authorization Server,<a href="#resourceowner_client">reference</a></li>
+                <li><strong>client<em>secret：</strong> you client</em>id's secret</li>
+            </ul>
+
+        </div>
+    </div>
+</div> 
+<script>
+    $(document).ready(function () {
+
+        
+
+    });
+</script>

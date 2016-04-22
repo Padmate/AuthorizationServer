@@ -84,6 +84,20 @@ namespace AuthorizationServer.UI.Home
         {
             return View();
         }
+        public IActionResult ApiMonitor()
+        {
+            return View();
+        }
+        public IActionResult FeedBack()
+        {
+            return View();
+        }
+
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
+
         public IActionResult AddDatabase()
         {
             AddScopes();
