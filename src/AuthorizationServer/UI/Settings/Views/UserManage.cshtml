@@ -1,98 +1,89 @@
 ﻿@using Microsoft.AspNet.Identity.EntityFramework
 @using Microsoft.AspNet.Identity
 @inject RoleManager<IdentityRole> roleManager
+
+<style>
+    #divContent > .container {
+        width: 100%;
+    }
+</style>
 <div class="row">
-    <div class="col-md-9">
-        <div id="userToolbar">
-            <a class="btn btn-primary" href='#UserAddModel' data-toggle='modal'>
-                <span class="iconfa-book">Add</span>
-            </a>
-            <button id="btnUserEdit" class="btn btn-success">
-                <i class="glyphicon glyphicon-plus"></i>Edit
-            </button>
-            <button id="btnUserDelete" class="btn btn-danger">
-                <i class="glyphicon glyphicon-remove"></i> Delete
-            </button>
+    <div class="col-md-6">
+        <!--Form-->
+        <form action="#" class="form-horizontal" role="form" name="userForm">
 
-        </div>
-        <table id="roleTable"></table>
-    </div>
-    <div class="col-md-3"></div>
+            <div style="height:450px;">
+                <div class="form-group hidden">
+                    <label class="col-sm-3 control-label">Id：</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="tbId">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tbUserName" class="col-sm-3 control-label">UserName：</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="tbUserName" required
+                                oninvalid="setCustomValidity('UserName is required')" oninput="setCustomValidity('')">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tbPassword" class="col-sm-3 control-label">Password：</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" required id="tbPassword">
+                    </div>
+                </div>
 
-</div>
+                <div class="form-group">
+                    <label for="taScopes" class="col-sm-3 control-label">Roles：</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control" disabled="disabled" rows="3" id="taRoles"></textarea>
+                    </div>
 
-<div class="modal fade" id="UserAddModel" tabindex="-1" user="dialog"
-     aria-labelledby="userModalLabel" aria-hidden="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close"
-                        data-dismiss="modal" aria-hidden="true">
-                    &times;
-                </button>
-                <h4 class="modal-title" id="userModalLabel">
-                    Add Users
-                </h4>
-            </div>
-            <div class="modal-body" style="height:400px;overflow-y:auto">
-              
-                <div class="span4">
-                    <div>
-                        <label class="col-md-2 modallabel">Name</label>
-                        <span class="field">
-                            <input type="text" id="tbAddName" class="input-large">
-                        </span>
-                    </div>
-                    <br />
-                    <div>
-                        <label class="col-md-2 modallabel">Password</label>
-                        <span class="field">
-                            <input type="text" id="tbAddPassword" class="input-large">
-                        </span>
-                    </div>
-                    <br />
-                    <div>
-                        <label class="col-md-2 modallabel">Roles</label>
-                        <span class="field">
-                            <textarea  rows="3" id="tbAddRoles" class="col-md-8"></textarea>
-                        </span>
-                        <div style="clear:both"></div>
-                    </div>
-                    
-                    <br />
-                    <div  style="margin:10px 90px;">
-                        @{
-                            var allRoles = roleManager.Roles.ToList();
-                            foreach (var role in allRoles)
-                            {
-                                <input name="ckRole" id="tb'@role'" class="rolecheck" value=@role.Name type="checkbox" style="margin:0 5px;" />
-                                <label for="tb'@role'" style="width:100px;">@role.Name</label>
-                                <br/>
-                            }
-                        }
+                </div>
+                <div class="form-group" style="height:200px;overflow-x:hidden; overflow-y:auto;">
+                    <div class="col-sm-offset-3 col-sm-9">
+                        <div class="checkbox">
+                            <label>
+                                @{
+                                var allRoles = roleManager.Roles.ToList();
+                                foreach (var role in allRoles)
+                                {
+                                        <input name="ckRole" id="tb'@role'" class="rolecheck" value=@role.Name type="checkbox" />
+                                        <label for="tb'@role'" style="font-weight:bold">@role.Name</label>
+                                        <br />
+                                }
+                                }
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button data-dismiss="modal" class="btn">取消</button>
-                <button  class="btn btn-primary" id="btnAdd">保存</button>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button type="button" class="btn btn-warning" id="btnUserSave">保存</button>
+                    <button type="button" class="btn btn-primary" id="btnUserEdit">修改</button>
+                    <button type="button" class="btn btn-danger" id="btnUserDelete">删除</button>
+
+                </div>
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal -->
+        </form>
+    </div>
+    <div class="col-md-6">
+        <table id="userTable"></table>
+    </div>
+
 </div>
 
+
 <script type="text/javascript">
+
+    var ShowAddButton = "add";
+    var ShowEditAndDeleteButton = "edit_delete";
 
     $(document).ready(function () {
         InitTable();
         InitToolBarButton();
-
-        // model hide event
-        jQuery('#UserAddModel').on('hide.bs.modal', function () {
-            
-            // clear input content
-            jQuery("#tbAddName").val("");
-        });
+        ChangeButtonStatus(ShowAddButton);
     });
 
     $(".rolecheck:checkbox").click(function () {
@@ -105,8 +96,12 @@
             }
 
         });
-        $("#tbAddRoles").val(chooseRoles);
+        $("#taRoles").val(chooseRoles);
     });
+
+    function CancelChecked() {
+        $(".rolecheck").attr("checked",false);
+    }
 
     function InitTable()
     {
@@ -122,7 +117,6 @@
             pageList: [10,25,50,100,200,'All'],
             sidePagination: "server",       //服务端请求
             idField:'Id',
-            toolbar:'#userToolbar',
             showRefresh:true,
             search:true,
             queryParams: ConstructQueryParams,
@@ -151,7 +145,20 @@
                     return ConstructRolesByUserName(row.UserName);
                 }
             }
-            ]
+            ],
+            onClickRow: function (row, element) {
+                
+                //清空所选行
+                $('#userTable').bootstrapTable('uncheckAll');
+
+                //选中所选行
+                var rowIndex = element[0].rowIndex;
+                $('#userTable').bootstrapTable('check', rowIndex - 1);
+                SetUserDetail(row);
+                ChangeButtonStatus();
+
+            }
+
         });
     }
 
@@ -168,10 +175,10 @@
 
     function InitToolBarButton()
     {
-        $("#btnAdd").click(function () {
-            var userName = jQuery("#tbAddName").val();
-            var password = jQuery("#tbAddPassword").val();
-            var roles = jQuery("#tbAddRoles").val();
+        $("#btnUserSave").click(function () {
+            var userName = jQuery("#tbUserName").val();
+            var password = jQuery("#tbPassword").val();
+            var roles = jQuery("#taRoles").val();
 
             if (userName.trim() == "") {
                 layer.alert("Please Input User Name", {
@@ -197,8 +204,6 @@
                 async: false,
                 success: function (message) {
                     if (message.Success) {
-                        //clost model
-                        CloseAddModel();
                         //重新加载
                         Search();
                     } else {
@@ -247,7 +252,7 @@
             //delete records
             var jsonUserId = JSON.stringify(userIds);
             $.ajax({
-                type: "get",//使用get方法访问后台
+                type: "post",//使用get方法访问后台
                 dataType: "json",//返回json格式的数据
                 url: "/Settings/BachDeleteByUserId",
                 data: {"UserIds":jsonUserId},
@@ -295,17 +300,45 @@
         return roleNames;
 
     }
-    //clost model
-    function CloseAddModel() {
-        $("#UserAddModel").removeClass("in");
-        $(".modal-backdrop").remove();
-        jQuery('#UserAddModel').modal('hide');
 
+    function EmptyUserDetail() {
+        SetUserDetail(null);
+    }
+
+    function SetUserDetail(user) {
+        
+        if (user != null) {
+            $("#tbId").val(user.Id);
+            $("#tbUserName").val(user.UserName);
+            $("#tbPassword").val(user.Password);
+            $("#taRoles").val(user.Roles);
+        } else {
+            $("#tbId").val("");
+            $("#tbUserName").val("");
+            $("#tbPassword").val("");
+            $("#taRoles").val("");
+
+        }
     }
 
     function Search() {
         //重新加载
         $('#userTable').bootstrapTable('refresh');
+        EmptyUserDetail();
+        ChangeButtonStatus(ShowAddButton);
+        CancelChecked();
     }
 
+    function ChangeButtonStatus(eventType) {
+        if (eventType == ShowAddButton) {
+            $("#btnUserSave").show();
+            $("#btnUserEdit").hide();
+            $("#btnUserDelete").hide();
+
+        } else {
+            $("#btnUserSave").hide();
+            $("#btnUserEdit").show();
+            $("#btnUserDelete").show();
+        }
+    }
 </script>   

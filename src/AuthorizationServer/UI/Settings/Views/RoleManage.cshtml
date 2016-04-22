@@ -1,124 +1,58 @@
-﻿
+﻿<style>
+     #divContent>.container {
+        width:100%;
+    }
+</style>
 <div class="row">
-    <div class="col-md-9">
-        <div class="panel-group" id="divSearch">
-            <div class="panel panel-danger">
-                <div>
-                    <div style="float:left;">
-                        <form class="form-horizontal" role="form">
-                            <div class="form-group has-success">
-                                <label class="col-sm-1 control-label text-right fa-align-center">Name</label>
-                                <div class="col-sm-4">
-                                    <input type="text" class="form-control" id="name">
-                                </div>
-
-                                <label class="col-sm-3 control-label text-right">NormalizedName</label>
-                                <div class="col-sm-4">
-                                    <input type="text" class="form-control" id="normalizedName">
-                                </div>
-                            </div>
-                        </form>
+    <div class="col-md-6">
+        <!--Form-->
+        <form action="#" class="form-horizontal" role="form" name="roleForm">
+            <div style="height:400px;">
+                <div class="form-group hidden">
+                    <label class="col-sm-3 control-label">Id：</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="tbId">
                     </div>
-                    <div style="float:right;">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#divSearch"
-                                   href="#divAdvancedSearch" class="glyphicon glyphicon-chevron-up">
-                                    高级检索
-                                </a>
-                            </h4>
-                        </div>
-                    </div>
-                    <div style="clear:both;"></div>
-
                 </div>
-
-                <div id="divAdvancedSearch" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        添加其余查询条件
+                <div class="form-group">
+                    <label for="tbName" class="col-sm-3 control-label">Name：</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="tbName" required
+                                oninvalid="setCustomValidity('Name is required')" oninput="setCustomValidity('')">
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="toolbar">
-            <a class="btn btn-primary" href='#RoleAddModel' data-toggle='modal'>
-                <span class="iconfa-book">Add</span>
-            </a>
-            <button id="btnRoleEdit" class="btn btn-success">
-                <i class="glyphicon glyphicon-plus"></i>Edit
-            </button>
-            <button id="btnRoleDelete" class="btn btn-danger">
-                <i class="glyphicon glyphicon-remove"></i> Delete
-            </button>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button type="button" class="btn btn-warning" id="btnRoleSave">保存</button>
+                    <button type="button" class="btn btn-primary" id="btnRoleEdit">修改</button>
+                    <button type="button" class="btn btn-danger" id="btnRoleDelete">删除</button>
 
-        </div>
-        <table id="table"></table>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <table id="roleTable"></table>
+    </div>
     
-</div>
-<!-- 模态框（Modal） -->
-<div class="modal fade" id="RoleAddModel" tabindex="-1" role="dialog"
-     aria-labelledby="roleModalLabel" aria-hidden="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close"
-                        data-dismiss="modal" aria-hidden="true">
-                    &times;
-                </button>
-                <h4 class="modal-title" id="roleModalLabel">
-                    Add Roles
-                </h4>
-            </div>
-            <div class="modal-body" style="height:200px;">
-                <div class="span4">
-                    <label class="modallabel">Name</label>
-                    <span class="field">
-                        <input type="text" id="tbAddName" class="input-large">
-                    </span>
-                    <br />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button data-dismiss="modal" class="btn" id="btnRoleClose">取消</button>
-
-                <button class="btn btn-primary" id="btnRoleAdd">保存</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal -->
 </div>
 
 
 <!--Script要放在HTML标签后，才能将值绑定到标签-->
 <script type="text/javascript">
 
+    var ShowAddButton = "add";
+    var ShowEditAndDeleteButton = "edit_delete";
+
     $(document).ready(function () {
         InitTable();
-        InitToolBarButton();
-        //model hide event
-        $('#RoleAddModel').on('hide.bs.modal', function () {
-
-            // clear input content
-            $("#tbAddName").val("");
-        });
-
+        InitButton();
+        ChangeButtonStatus(ShowAddButton);
     });
 
-
-    //clost model
-    function CloseAddModel() {
-        //Index load html后，hide失效，
-        //如果把当前html，写到Index,切Index不进行Load，则hide有效？
-        $("#RoleAddModel").hide();
-        $("#RoleAddModel").removeClass("in");
-        $(".modal-backdrop").remove();
-
-       // $("#btnRoleClose").trigger("click");
-    }
-
     function InitTable() {
-        $('#table').bootstrapTable({
+        $('#roleTable').bootstrapTable({
             height: 500,
             method: 'post',                 //The method type to request remote data.
             url: '/Settings/GetRolePageData',
@@ -130,7 +64,6 @@
             pageList: [10, 25, 50, 100, 200, 'All'],
             sidePagination: "server",       //服务端请求
             idField: 'Id',
-            toolbar: '#toolbar',
             showRefresh: true,
             search: true,
             queryParams: ConstructQueryParams,
@@ -152,7 +85,19 @@
                 field: 'NormalizedName',
                 title: 'NormalizedName'
             }
-            ]
+            ],
+            onClickRow: function (row, element) {
+                //清空所选行
+                $('#roleTable').bootstrapTable('uncheckAll');
+
+                //选中所选行
+                var rowIndex = element[0].rowIndex;
+                $('#roleTable').bootstrapTable('check', rowIndex-1);
+
+                SetRoleDetail(row);
+                ChangeButtonStatus(ShowEditAndDeleteButton);
+
+            }
         });
     }
 
@@ -166,9 +111,9 @@
         return params;
     }
 
-    function InitToolBarButton() {
-        $("#btnRoleAdd").click(function () {
-            var roleName = $("#tbAddName").val(); 
+    function InitButton() {
+        $("#btnRoleSave").click(function () {
+            var roleName = $("#tbName").val(); 
             if (roleName.trim() == "") {
                 layer.alert("Please Input Role Name", {
                     skin: 'layui-layer-molv'
@@ -187,8 +132,6 @@
                 success: function (message) {
                     if (message.Success) {
                         
-                        //clost model
-                        CloseAddModel();
                         //重新加载
                         Search();
                     } else {
@@ -215,7 +158,7 @@
 
         $("#btnRoleDelete").click(function () {
 
-            var selections = $('#table').bootstrapTable('getSelections');
+            var selections = $('#roleTable').bootstrapTable('getSelections');
             if (selections.length == 0) {
                 layer.alert("Please select records", {
                     skin: 'layui-layer-molv'
@@ -257,9 +200,43 @@
         });
     }
 
+    function EmptyRoleDetail() {
+        SetRoleDetail(null);
+    }
+    function SetRoleDetail(role) {
+
+        if (role != null) {
+            $("#tbId").val(role.Id);
+            $("#tbName").val(role.Name);
+            
+        } else {
+            $("#tbId").val("");
+            $("#tbName").val("");
+           
+
+        }
+    }
+
     function Search() {
         //重新加载
-        $('#table').bootstrapTable('refresh');
+        $('#roleTable').bootstrapTable('refresh');
+        //清空输入框
+        EmptyRoleDetail();
+        //按钮初始化
+        ChangeButtonStatus(ShowAddButton);
+    }
+
+    function ChangeButtonStatus(eventType) {
+        if (eventType == ShowAddButton) {
+            $("#btnRoleSave").show();
+            $("#btnRoleEdit").hide();
+            $("#btnRoleDelete").hide();
+
+        } else {
+            $("#btnRoleSave").hide();
+            $("#btnRoleEdit").show();
+            $("#btnRoleDelete").show();
+        }
     }
 
 </script>

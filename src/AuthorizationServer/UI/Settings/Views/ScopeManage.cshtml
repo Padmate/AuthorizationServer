@@ -1,38 +1,99 @@
 ﻿@using AuthorizationServer.Models;
 @inject  ScopeConfigurationContext _scopeContext
-
+<style>
+    #divContent > .container {
+        width: 100%;
+    }
+</style>
 <div class="row">
-    <div class="col-md-9">
-        <div class="col-md-4">
-            @if (_scopeContext.Scopes.Count() > 0)
-            {
+    <div class="col-md-4">
+        @if (_scopeContext.Scopes.Count() > 0)
+        {
 
-                <a class="btn btn-success disabled" href="/Settings/CreateScopes">AddScopes &raquo;</a>
-                        <br />
-                        <br />
-                        <a class="btn btn-danger" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
-            }
-            else
-            {
-                <a class="btn btn-success" href="/Settings/CreateScopes">AddScopes &raquo;</a>
-                        <br />
-                        <br />
-                        <a class="btn btn-danger disabled" href="/Settings/DeleteScopes">DeleteScopes &raquo;</a>
-            }
+            <a class="btn btn-success disabled" id="btnAddScopes">AddScopes &raquo;</a>
+            <br />
+            <br />
+            <a class="btn btn-danger" id="btnDeleteScopes">DeleteScopes &raquo;</a>
+        }
+        else
+        {
+            <a class="btn btn-success" id="btnAddScopes">AddScopes &raquo;</a>
+            <br />
+            <br />
+            <a class="btn btn-danger disabled" id="btnDeleteScopes">DeleteScopes &raquo;</a>
+        }
 
-        </div>
-        <div class="col-md-8">
-            <table id="scopeTable"></table>
-        </div>
     </div>
-    <div class="col-md-3"></div>
+    <div class="col-md-8">
+        <table id="scopeTable"></table>
+    </div>
+    
 </div>
 <script>
 
     $(document).ready(function () {
-        
+
+        InitButton();
         InitScopeTable();
     });
+    
+    function InitButton() {
+        InitAddButton();
+        InitDeleteButton();
+    }
+
+    function InitAddButton() {
+
+        $("#btnAddScopes").click(function (e) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "/Settings/CreateScopes",
+                //data: obj,
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        Search();
+                        $("#btnAddScopes").addClass('disabled');
+                        $("#btnDeleteScopes").removeClass('disabled');
+                    } else {
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            , closeBtn: 0
+                            , shift: 5 //动画类型
+                        });
+                    }
+                }
+            });
+        });
+    }
+
+    function InitDeleteButton() {
+
+        $("#btnDeleteScopes").click(function (e) {
+
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "/Settings/DeleteScopes",
+                //data: { "id": id },
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        Search();
+                        $("#btnAddScopes").removeClass('disabled');
+                        $("#btnDeleteScopes").addClass('disabled');
+                    } else {
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            , closeBtn: 0
+                            , shift: 5 //动画类型
+                        });
+                    }
+                }
+            });
+        });
+    }
 
     function InitScopeTable() {
         $('#scopeTable').bootstrapTable({
@@ -98,4 +159,10 @@
         };
         return params;
     }
+
+    function Search() {
+        //重新加载
+        $('#scopeTable').bootstrapTable('refresh');
+    }
+
 </script>

@@ -55,6 +55,15 @@ namespace AuthorizationServer.UI.Settings
         [HttpPost]
         public ActionResult CreateClient(ClientViewModel model)
         {
+            Message message = new Message();
+            message.Success = true;
+            if (!ModelState.IsValid)
+            {
+                message.Success = false;
+                message.Content = ModelStateError();
+                return Json(message);
+            }
+
             try
             {
                 #region Add Client
@@ -63,7 +72,8 @@ namespace AuthorizationServer.UI.Settings
                 client.ClientName = model.ClientName;
                 client.ClientUri = model.ClientUri;
                 client.Flow = (Flows)(System.Convert.ToInt32(model.Flow));
-               
+                client.RequireConsent = model.RequireConsents;
+
                 if (!string.IsNullOrEmpty(model.ClientSecret))
                 {
                     client.ClientSecrets = new List<Secret>()
@@ -89,11 +99,11 @@ namespace AuthorizationServer.UI.Settings
             }
             catch (Exception e)
             {
-                ModelState.AddModelError(string.Empty, "新增失败："+e.Message);
+                message.Success = false;
+                message.Content = "Add failed：" + e.Message;
             }
-            
 
-            return View("Index",model);
+            return Json(message);
         }
 
         private void AddClients(Client ct)
@@ -223,17 +233,90 @@ namespace AuthorizationServer.UI.Settings
         [HttpPost]
         public ActionResult EditClient(ClientViewModel model)
         {
-            return View("Index");
+            Message message = new Message();
+            message.Success = true;
+
+            if (!ModelState.IsValid)
+            {
+                message.Success = false;
+                message.Content = ModelStateError();
+                return Json(message);
+            }
+            if (string.IsNullOrEmpty(model.Id))
+            {
+                message.Success = false;
+                message.Content = "Edit fail:Id is null ";
+                return Json(message);
+            }
+            try
+            {
+                //先删除，再新增
+                var clientDelete = _clientContext.Clients.FirstOrDefault(c => c.Id == new Guid(model.Id));
+                _clientContext.Remove(clientDelete);
+
+                #region Add Client
+                Client client = new Client();
+                client.ClientId = model.ClientId;
+                client.ClientName = model.ClientName;
+                client.ClientUri = model.ClientUri;
+                client.Flow = (Flows)(System.Convert.ToInt32(model.Flow));
+                client.RequireConsent = model.RequireConsents;
+
+                if (!string.IsNullOrEmpty(model.ClientSecret))
+                {
+                    client.ClientSecrets = new List<Secret>()
+                {
+                    new Secret(model.ClientSecret.Sha256())
+                };
+                }
+                if (!string.IsNullOrEmpty(model.RedirectUri))
+                {
+                    client.RedirectUris = model.RedirectUri.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+                client.AllowedScopes = new List<string>
+                {
+                    StandardScopes.OpenId.Name,
+                    StandardScopes.Profile.Name,
+                    StandardScopes.Email.Name,
+                    StandardScopes.Roles.Name,
+                    "dpcontrolapiscope"
+                };
+
+                AddClients(client);
+                #endregion
+                
+
+
+            } catch (Exception e)
+            {
+                message.Success = false;
+                message.Content = "Edit failed :" + e.Message;
+            }
+
+            return Json(message);
         }
 
         [HttpPost]
         public ActionResult DeleteClient(string id)
         {
-            var client = _clientContext.Clients.FirstOrDefault(c=>c.Id == new Guid(id));
-            _clientContext.Remove(client);
-            _clientContext.SaveChanges();
-            
-            return View("Index");
+            Message message = new Message();
+            message.Success = true;
+
+            try
+            {
+                var client = _clientContext.Clients.FirstOrDefault(c => c.Id == new Guid(id));
+                _clientContext.Remove(client);
+                _clientContext.SaveChanges();
+
+            }
+            catch(Exception e)
+            {
+                message.Success = false;
+                message.Content = "Delete failed :"+e.Message;
+
+            }
+
+            return Json(message);
 
         }
 
@@ -283,11 +366,23 @@ namespace AuthorizationServer.UI.Settings
             return View();
         }
 
+        [HttpPost]
         public ActionResult CreateScopes()
         {
-            AddScopes();
+            Message message = new Message();
+            message.Success = true;
+            try
+            {
+                AddScopes();
 
-            return View("Index");
+            }
+            catch (Exception e)
+            {
+                message.Success = false;
+                message.Content = "Add fail:" + e.Message;
+            }
+            return Json(message);
+
         }
 
         private void AddScopes()
@@ -349,14 +444,26 @@ namespace AuthorizationServer.UI.Settings
             }
             _scopeContext.SaveChanges();
         }
+        
 
+        [HttpPost]
         public ActionResult DeleteScopes()
         {
-            _scopeContext.RemoveRange(_scopeContext.Scopes);
-            _scopeContext.SaveChanges();
-            
+            Message message = new Message();
+            message.Success = true;
+            try
+            {
+                _scopeContext.RemoveRange(_scopeContext.Scopes);
+                _scopeContext.SaveChanges();
 
-            return View("Index");
+            }
+            catch (Exception e)
+            {
+                message.Success = false;
+                message.Content = "Delete fail:" + e.Message;
+            }
+            return Json(message);
+            
         }
 
         public IActionResult GetScopesPageData()
@@ -540,6 +647,7 @@ namespace AuthorizationServer.UI.Settings
             }
         }
 
+        [HttpPost]
         public async Task<IActionResult> BachDeleteByUserId(string UserIds)
         {
             Message message = new Message();

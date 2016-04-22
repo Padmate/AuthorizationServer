@@ -1,121 +1,225 @@
 ﻿@using IdentityServer4.Core.Models;
 @model AuthorizationServer.UI.Settings.ClientViewModel
-
+<style>
+    #divContent > .container {
+        width: 100%;
+    }
+</style>
 <div class="row">
-    <div class="col-md-9">
-        <div class="col-md-8">
-            <!--Form-->
-            <form asp-controller="Settings" asp-action="CreateClient" class="form-horizontal" role="form" name="clientForm">
+    <div class="col-md-8">
+        <!--Form-->
+        <form action="#" class="form-horizontal" role="form" name="clientForm">
 
-                <div class="form-group hidden">
-                    <label class="col-sm-3 control-label">Id：</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" asp-for="Id" id="lbId">
-                    </div>
+            <div class="form-group hidden">
+                <label class="col-sm-3 control-label">Id：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" asp-for="Id" id="tbId">
                 </div>
-                <div class="form-group">
-                    <label for="tbClientId" class="col-sm-3 control-label">ClientID：</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" asp-for="ClientId" id="tbClientId" required
-                               oninvalid="setCustomValidity('ClientId is required')" oninput="setCustomValidity('')">
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="tbClientId" class="col-sm-3 control-label">ClientID：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" asp-for="ClientId" id="tbClientId" required
+                            oninvalid="setCustomValidity('ClientId is required')" oninput="setCustomValidity('')">
                 </div>
-                <div class="form-group">
-                    <label for="tbClientName" class="col-sm-3 control-label">ClientName：</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" asp-for="ClientName" required id="tbClientName">
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="tbClientName" class="col-sm-3 control-label">ClientName：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" asp-for="ClientName" required id="tbClientName">
                 </div>
-                <div class="form-group">
-                    <label for="tbClientUri" class="col-sm-3 control-label">ClientUri：</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" asp-for="ClientUri" id="tbClientUri">
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="tbClientUri" class="col-sm-3 control-label">ClientUri：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" asp-for="ClientUri" id="tbClientUri">
                 </div>
-                <div class="form-group">
-                    <label for="tbClientSecret" class="col-sm-3 control-label">ClientSecret：</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" asp-for="ClientSecret" id="tbClientSecret">
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="tbClientSecret" class="col-sm-3 control-label">ClientSecret：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" asp-for="ClientSecret" id="tbClientSecret">
                 </div>
-                <div class="form-group">
-                    <label for="taScopes" class="col-sm-3 control-label">AllowScopes：</label>
-                    <div class="col-sm-9">
-                        <textarea class="form-control" rows="3" id="taScopes" asp-for="AllowScope"></textarea>
-                    </div>
-
-                </div>
-                <div class="form-group">
-                    <label for="selFlow" class="col-sm-3 control-label">Flows：</label>
-                    <div class="col-sm-9">
-                        <select class="form-control" asp-for="Flow" id="selFlow" required>
-                            <option value="@System.Convert.ToInt32(Flows.AuthorizationCode)">@Flows.AuthorizationCode</option>
-                            <option value="@System.Convert.ToInt32(Flows.Implicit)">@Flows.Implicit</option>
-                            <option value="@System.Convert.ToInt32(Flows.ResourceOwner)">@Flows.ResourceOwner</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="taRedirectUri" class="col-sm-3 control-label">RedirectUris：</label>
-                    <div class="col-sm-9">
-                        <textarea class="form-control" rows="3" asp-for="RedirectUri" id="taRedirectUris"></textarea>
-                    </div>
-
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-3 col-sm-9">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" asp-for="RequireConsents" id="ckRequireConsents"> Require Consents
-                            </label>
-                        </div>
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="taScopes" class="col-sm-3 control-label">AllowScopes：</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" disabled="disabled" rows="3" id="taScopes">dpcontrolapiscope</textarea>
                 </div>
 
-                <div class="form-group">
-                    <div class="col-sm-offset-3 col-sm-9">
-                        <button type="submit" class="btn btn-warning" id="btnClientSave">保存</button>
-                        <button type="submit" class="btn btn-primary" id="btnClientEdit">修改</button>
-                        <button type="button" class="btn btn-danger" id="btnClientDelete">删除</button>
+            </div>
+            <div class="form-group">
+                <label for="selFlow" class="col-sm-3 control-label">Flows：</label>
+                <div class="col-sm-9">
+                    <select class="form-control" asp-for="Flow" id="selFlow" required>
+                        <option value="@System.Convert.ToInt32(Flows.AuthorizationCode)">@Flows.AuthorizationCode</option>
+                        <option value="@System.Convert.ToInt32(Flows.Implicit)">@Flows.Implicit</option>
+                        <option value="@System.Convert.ToInt32(Flows.ResourceOwner)">@Flows.ResourceOwner</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="taRedirectUri" class="col-sm-3 control-label">RedirectUris：</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" rows="3" asp-for="RedirectUri" id="taRedirectUris"></textarea>
+                </div>
 
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" asp-for="RequireConsents" id="ckRequireConsents"> Require Consents
+                        </label>
                     </div>
                 </div>
-            </form>
-        </div>
-        <div class="col-md-4">
-            <table id="clientTable"></table>
-        </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button type="button" class="btn btn-warning" id="btnClientSave">保存</button>
+                    <button type="button" class="btn btn-primary" id="btnClientEdit">修改</button>
+                    <button type="button" class="btn btn-danger" id="btnClientDelete">删除</button>
+                        
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="col-md-3"></div>
-
+    <div class="col-md-4">
+        <table id="clientTable"></table>
+    </div>
+   
 </div>
 
 
 <script>
 
+    var ShowAddButton = "add";
+    var ShowEditAndDeleteButton = "edit_delete";
 
     $(document).ready(function () {
         
-        $("#btnClientEdit").click(function (e) {
+        InitButtons();
+        InitClientTable();
+        //
+        ChangeButtonStatus(ShowAddButton);
 
-            var id = $("#lbId").val();
-            clientForm.action = "/Settings/EditClient";
-            clientForm.submit();
+    });
+
+    function InitButtons() {
+
+        InitAddButton();
+        InitEditButton();
+        InitDeleteButton();
+        
+    }
+
+    function InitAddButton() {
+
+        $("#btnClientSave").click(function (e) {
+
+            var obj = GetSubmitValues();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "/Settings/CreateClient",
+                data: obj,
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        Search();
+                    } else {
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            , closeBtn: 0
+                            , shift: 5 //动画类型
+                        });
+                    }
+
+                }
+            });
 
         });
+    }
+    function InitEditButton() {
+
+        $("#btnClientEdit").click(function (e) {
+
+            var obj = GetSubmitValues();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "/Settings/EditClient",
+                data: obj,
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        Search();
+                    } else {
+                        
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            , closeBtn: 0
+                            , shift: 5 //动画类型
+                        });
+                    }
+
+                }
+            });
+
+        });
+    }
+
+    function InitDeleteButton() {
 
         $("#btnClientDelete").click(function (e) {
 
-            var id = $("#lbId").val();
-            clientForm.action = "/Settings/DeleteClient/?id=" + id;
-            clientForm.submit();
+            var id = $("#tbId").val();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "/Settings/DeleteClient",
+                data: { "id": id },
+                async: false,
+                success: function (message) {
+                    if (message.Success) {
+                        Search();
+                    } else {
+                        layer.alert(message.Content, {
+                            skin: 'layui-layer-molv'
+                            , closeBtn: 0
+                            , shift: 5 //动画类型
+                        });
+                    }
 
+                }
+            });
         });
+    }
 
-        InitClientTable();
-        ChangeClientButtons("add");
-    });
-
+    function GetSubmitValues() {
+        var obj = {
+            Id: "",
+            ClientId: "",
+            ClientName: "",
+            ClientUri: "",
+            ClientSecret: "",
+            Flow: "",
+            RedirectUri: "",
+            AllowScope: "",
+            RequireConsents: false
+        };
+        obj.Id = $("#tbId").val();
+        obj.ClientId = $("#tbClientId").val();
+        obj.ClientName = $("#tbClientName").val();
+        obj.ClientUri = $("#tbClientUri").val();
+        obj.ClientSecret = $("#tbClientSecret").val();
+        obj.Flow = $("#selFlow").val();
+        obj.RedirectUri = $("#taRedirectUris").val();
+        obj.RequireConsents = $("#ckRequireConsents").is(':checked');
+        
+        return obj;
+    }
 
 
     function InitClientTable() {
@@ -153,11 +257,21 @@
             onClickRow: function (row,element) {
                 var clientDetail = GetClientDetail(row.Id);
                 SetClientDetail(clientDetail);
-                ChangeClientButtons("show");
+                ChangeButtonStatus();
 
             }
 
         });
+
+    }
+
+    function Search() {
+        //重新加载
+        $('#clientTable').bootstrapTable('refresh');
+        //清空输入框
+        EmptyClientDetail();
+        //按钮初始化
+        ChangeButtonStatus(ShowAddButton);
 
     }
 
@@ -187,26 +301,28 @@
 
     }
 
+    function EmptyClientDetail() {
+        SetClientDetail(null);
+    }
+
     function SetClientDetail(client) {
 
         if (client != null) {
-            $("#lbId").val(client.Id);
+            $("#tbId").val(client.Id);
             $("#tbClientId").val(client.ClientId);
             $("#tbClientName").val(client.ClientName);
             $("#tbClientUri").val(client.ClientUri);
             $("#tbClientSecret").val(client.ClientSecret);
-            ConstructTextAreaClientScopeValue(client.AllowedScopes);
             $("#selFlow").val(client.Flow);
             ConstructTextAreaClientRedirectUriValue(client.RedirectUris);
             $("#ckRequireConsents").attr("checked",client.RequireConsent);
         } else {
-            $("#lbId").val("");
+            $("#tbId").val("");
             $("#tbClientId").val("");
             $("#tbClientName").val("");
             $("#tbClientUri").val("");
             $("#tbClientSecret").val("");
-            ConstructTextAreaClientScopeValue(null);
-            $("#selFlow").val("");
+            $("#selFlow").get(0).selectedIndex = 0;
             ConstructTextAreaClientRedirectUriValue(null);
             $("#ckRequireConsents").attr("checked", false);
 
@@ -238,8 +354,8 @@
 
     }
 
-    function ChangeClientButtons(eventType) {
-        if(eventType =="add")
+    function ChangeButtonStatus(eventType) {
+        if (eventType == ShowAddButton)
         {
             $("#btnClientSave").show();
             $("#btnClientEdit").hide();
