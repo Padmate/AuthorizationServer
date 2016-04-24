@@ -1,4 +1,5 @@
-﻿<style>
+﻿
+<style>
      #divContent>.container {
         width:100%;
     }
@@ -46,6 +47,9 @@
     var ShowEditAndDeleteButton = "edit_delete";
 
     $(document).ready(function () {
+
+        //重新加载js,下拉框才有用
+        $.getScript("../lib/bootstrap/js/bootstrap.js");
         InitTable();
         InitButton();
         ChangeButtonStatus(ShowAddButton);
