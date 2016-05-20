@@ -15,8 +15,7 @@ namespace AuthorizationServer.UI.Settings
         [Required]
         public string ClientName { get; set; }
         public string ClientUri { get; set; }
-
-        [Required]
+        
         public string ClientSecret { get; set; }
 
         [Required]

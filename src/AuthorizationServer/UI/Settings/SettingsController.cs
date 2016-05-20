@@ -607,34 +607,45 @@ namespace AuthorizationServer.UI.Settings
                 return Json(message);
             }
 
-            //用户的角色
-            string[] roles = model.Roles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            //判断这些角色是否属于角色表
-            foreach (string role in roles)
+            try
             {
-                bool isRoleExisted = await _roleManager.RoleExistsAsync(role);
-                if (!isRoleExisted)
+                //用户的角色
+                string[] roles = model.Roles.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                //判断这些角色是否属于角色表
+                foreach (string role in roles)
+                {
+                    bool isRoleExisted = await _roleManager.RoleExistsAsync(role);
+                    if (!isRoleExisted)
+                    {
+                        message.Success = false;
+                        message.Content = "Role：" + role + "is not exist in system!";
+                        return Json(message);
+
+                    }
+                }
+
+                //新增用户
+                var user = new ApplicationUser { UserName = model.UserName };
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
                 {
                     message.Success = false;
-                    message.Content = "Role：" + role + "is not exist in system!";
+                    message.Content = result.Errors.First().Description;
                     return Json(message);
 
                 }
-            }
+                //把用户添加到角色
+                var curruser = await _userManager.FindByNameAsync(model.UserName);
+                result = await _userManager.AddToRolesAsync(curruser, roles);
 
-            //新增用户
-            var user = new ApplicationUser { UserName = model.UserName };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            }
+            catch(Exception e)
             {
                 message.Success = false;
-                message.Content = result.Errors.First().Description;
-                return Json(message);
-
+                message.Content = "Exception："+e.Message;
             }
-            //把用户添加到角色
-            var curruser = await _userManager.FindByNameAsync(model.UserName);
-            result = await _userManager.AddToRolesAsync(curruser, roles);
+
+            
 
 
             return Json(message);

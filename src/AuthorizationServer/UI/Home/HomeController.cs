@@ -7,11 +7,26 @@ using Microsoft.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TwentyTwenty.IdentityServer4.EntityFramework7.Entities;
 
 namespace AuthorizationServer.UI.Home
 {
+    static class AsyncHelper
+    {
+        private static readonly TaskFactory _myTaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None, TaskContinuationOptions.None, TaskScheduler.Default);
+        public static TResult RunSync<TResult>(Func<Task<TResult>> func)
+        {
+            return _myTaskFactory.StartNew(func).Unwrap().GetAwaiter().GetResult();
+        }
+
+        public static void RunSync(Func<Task> func)
+        {
+            _myTaskFactory.StartNew(func).Unwrap().GetAwaiter().GetResult();
+        }
+    }
+
     public class HomeController : Controller
     {
         private ScopeConfigurationContext _scopeContext;
@@ -35,13 +50,21 @@ namespace AuthorizationServer.UI.Home
         
 
         [Route("/")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index(bool init)
         {
-            await InitAdmin();
+
             return View();
         }
 
-        public async Task<Message> InitAdmin( )
+        public async Task<IActionResult> InitAdmin(bool init)
+        {
+            var message = await InitAdminInfo();
+
+            return Json(message.Content);
+        }
+
+
+        public async Task<Message> InitAdminInfo( )
         {
             Message message = new Message();
             message.Success = true;
